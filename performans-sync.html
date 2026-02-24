@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Performans">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Haftalık Takip</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f17;--surface:#16161f;--card:#1c1c28;--border:#2a2a3d;
+  --text:#e8e8f0;--muted:#6b6b8a;--accent:#7c83fd;--white:#fff;
+  --green:#57c97a;--red:#f38ba8;--orange:#fab387;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;padding-bottom:80px;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0f0f17,#1a1a2e,#16213e);border-bottom:1px solid var(--border);padding:30px 24px 24px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(124,131,253,.15),transparent 70%);pointer-events:none;}
+.hero-badge{display:inline-block;background:rgba(124,131,253,.12);border:1px solid rgba(124,131,253,.3);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:12px;}
+.hero h1{font-size:clamp(18px,4vw,32px);font-weight:700;color:var(--white);margin-bottom:4px;}
+.hero h1 span{color:var(--accent);}
+.hero p{color:var(--muted);font-size:13px;}
+.hero-stats{display:flex;justify-content:center;gap:20px;margin-top:14px;flex-wrap:wrap;}
+.hero-stat{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:5px 16px;font-size:12px;color:var(--muted);}
+.hero-stat strong{color:var(--accent);font-weight:700;}
+
+/* QUARTER TABS */
+.q-tabs{display:flex;justify-content:center;gap:8px;padding:18px 16px 0;flex-wrap:wrap;}
+.q-tab{padding:8px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.q-tab:hover{border-color:var(--accent);color:var(--text);}
+.q-tab.active{background:var(--accent);border-color:var(--accent);color:var(--white);}
+
+/* WEEK SELECTOR */
+.week-selector-wrap{max-width:1100px;margin:0 auto;padding:18px 16px 0;}
+.week-selector-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;}
+.week-btn{padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.4;}
+.week-btn:hover{border-color:var(--accent);color:var(--text);}
+.week-btn.active{background:var(--accent);border-color:var(--accent);color:var(--white);font-weight:600;}
+.week-btn .wdate{font-size:9px;opacity:.7;display:block;margin-top:2px;}
+.week-btn .wpct{font-size:10px;color:var(--green);display:block;margin-top:2px;}
+.week-btn.active .wpct{color:rgba(255,255,255,.8);}
+
+/* MAIN */
+.container{max-width:1100px;margin:0 auto;padding:20px 16px;}
+
+/* WEEK HEADER */
+.week-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.week-title{font-size:18px;font-weight:700;color:var(--white);}
+.week-title span{color:var(--accent);}
+.week-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px;}
+.btn-copy{background:rgba(124,131,253,.12);border:1px solid rgba(124,131,253,.3);color:var(--accent);border-radius:8px;padding:7px 16px;font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.btn-copy:hover{background:rgba(124,131,253,.25);}
+
+/* SCORE ROW */
+.score-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;transition:transform .2s;}
+.score-card:hover{transform:translateY(-2px);}
+.sc-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:7px;}
+.sc-val{font-size:28px;font-weight:700;color:var(--white);line-height:1;margin-bottom:3px;}
+.sc-sub{font-size:11px;color:var(--muted);}
+.score-card.accent{border-color:var(--accent);background:rgba(124,131,253,.08);}
+.score-card.accent .sc-val{color:var(--accent);}
+
+/* PROGRESS */
+.progress-wrap{margin-bottom:18px;}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;}
+.progress-bar-bg{height:7px;background:var(--border);border-radius:8px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:8px;transition:width .6s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,var(--accent),#a78bfa);}
+
+/* TASK TABLE */
+.task-table{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.cat-header{padding:9px 16px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tgt-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;padding:2px 8px;border-radius:6px;}
+.day-headers{display:grid;align-items:center;padding:6px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);gap:6px;}
+.dh-span{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);text-align:center;width:30px;}
+.task-row{display:grid;align-items:center;padding:6px 16px;border-top:1px solid var(--border);gap:6px;transition:background .15s;}
+.task-row:hover{background:rgba(255,255,255,.02);}
+.task-name{font-size:12px;color:var(--text);}
+.pts-badge{font-family:'DM Mono',monospace;font-size:10px;padding:2px 5px;border-radius:5px;font-weight:500;min-width:27px;text-align:center;}
+.day-input{width:30px;height:29px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;text-align:center;transition:all .15s;cursor:pointer;-moz-appearance:textfield;}
+.day-input::-webkit-inner-spin-button,.day-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.day-input:hover{border-color:var(--accent);}
+.day-input:focus{outline:none;border-color:var(--accent);background:rgba(124,131,253,.08);}
+.day-input.done{background:rgba(87,201,122,.15);border-color:var(--green);color:var(--green);}
+.day-input.partial{background:rgba(250,179,135,.12);border-color:var(--orange);color:var(--orange);}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:16px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.chart-card h3{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:14px;}
+.chart-card canvas{max-height:220px;}
+
+/* SETTINGS */
+.settings-wrap{display:flex;flex-direction:column;gap:14px;}
+.settings-info{background:rgba(124,131,253,.08);border:1px solid rgba(124,131,253,.25);border-radius:12px;padding:13px 16px;font-size:13px;color:var(--muted);line-height:1.6;}
+.settings-info strong{color:var(--accent);}
+.copy-notice{background:rgba(87,201,122,.08);border:1px solid rgba(87,201,122,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--green);}
+
+.cat-editor{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2px;}
+.cat-ed-header{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.01);}
+.color-swatch{width:22px;height:22px;border-radius:6px;flex-shrink:0;cursor:pointer;position:relative;border:2px solid rgba(255,255,255,.15);transition:transform .15s;}
+.color-swatch:hover{transform:scale(1.15);}
+.cp-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.cat-name-in{flex:1;background:transparent;border:none;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--white);outline:none;border-bottom:1px solid transparent;transition:border .15s;}
+.cat-name-in:focus{border-bottom-color:var(--accent);}
+.tgt-wrap{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);white-space:nowrap;}
+.small-num{width:44px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:3px 5px;text-align:center;outline:none;transition:border .15s;-moz-appearance:textfield;}
+.small-num::-webkit-inner-spin-button,.small-num::-webkit-outer-spin-button{-webkit-appearance:none;}
+.small-num:focus{border-color:var(--accent);}
+.btn-icon{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:3px 6px;border-radius:5px;transition:all .15s;line-height:1;}
+.btn-icon:hover{background:rgba(255,255,255,.06);color:var(--text);}
+.btn-icon.danger:hover{color:var(--red);background:rgba(243,139,168,.1);}
+
+.task-ed-row{display:flex;align-items:center;gap:7px;padding:7px 14px;border-top:1px solid var(--border);transition:background .15s;}
+.task-ed-row:hover{background:rgba(255,255,255,.015);}
+.drag-h{color:var(--muted);font-size:12px;cursor:grab;user-select:none;}
+.task-name-in{flex:1;background:transparent;border:none;font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--text);outline:none;border-bottom:1px solid transparent;transition:border .15s;padding:2px 0;}
+.task-name-in:focus{border-bottom-color:var(--accent);}
+
+.add-task-row{display:flex;align-items:center;gap:7px;padding:9px 14px;border-top:1px solid var(--border);background:rgba(255,255,255,.008);}
+.add-task-in{flex:1;background:transparent;border:none;font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--muted);outline:none;transition:color .15s;}
+.add-task-in:focus{color:var(--text);}
+.add-task-in::placeholder{color:var(--border);}
+.btn-add{background:rgba(124,131,253,.12);border:1px solid rgba(124,131,253,.3);color:var(--accent);border-radius:6px;padding:4px 12px;font-family:'Space Grotesk',sans-serif;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-add:hover{background:rgba(124,131,253,.25);}
+
+.add-cat-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:var(--card);border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.add-cat-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,131,253,.05);}
+
+.settings-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;}
+.btn-primary{background:var(--accent);border:none;color:var(--white);border-radius:9px;padding:10px 22px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.btn-primary:hover{opacity:.85;}
+.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger-out{background:rgba(243,139,168,.08);border:1px solid rgba(243,139,168,.25);color:var(--red);border-radius:9px;padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
+.btn-danger-out:hover{background:rgba(243,139,168,.15);}
+
+.pts-warn{font-family:'DM Mono',monospace;font-size:11px;padding:9px 14px;border-radius:9px;text-align:center;}
+.warn-ok{background:rgba(87,201,122,.1);color:var(--green);border:1px solid rgba(87,201,122,.2);}
+.warn-bad{background:rgba(243,139,168,.1);color:var(--red);border:1px solid rgba(243,139,168,.2);}
+
+/* PILL */
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;font-family:'DM Mono',monospace;}
+.pill-great{background:rgba(87,201,122,.15);color:var(--green);}
+.pill-ok{background:rgba(124,131,253,.15);color:var(--accent);}
+.pill-mid{background:rgba(250,179,135,.15);color:var(--orange);}
+.pill-low{background:rgba(243,139,168,.15);color:var(--red);}
+
+/* YEAR OVERVIEW */
+.year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:5px;margin-bottom:20px;}
+.year-cell{padding:6px 4px;border-radius:7px;border:1px solid var(--border);background:var(--surface);text-align:center;cursor:pointer;transition:all .2s;font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);}
+.year-cell:hover{border-color:var(--accent);}
+.year-cell.has-data{background:var(--card);}
+.year-cell .yc-pct{font-size:11px;font-weight:700;margin-top:2px;}
+.year-cell.pct-great{border-color:rgba(87,201,122,.4);}.year-cell.pct-great .yc-pct{color:var(--green);}
+.year-cell.pct-ok{border-color:rgba(124,131,253,.4);}.year-cell.pct-ok .yc-pct{color:var(--accent);}
+.year-cell.pct-mid{border-color:rgba(250,179,135,.4);}.year-cell.pct-mid .yc-pct{color:var(--orange);}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#2a2a3d;border:1px solid var(--accent);color:var(--text);padding:9px 22px;border-radius:28px;font-size:12px;z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.data-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.data-bar-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;}
+.btn-export{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid;}
+.btn-export.green{background:rgba(87,201,122,.1);border-color:rgba(87,201,122,.3);color:#57c97a;}
+.btn-export.green:hover{background:rgba(87,201,122,.2);}
+.btn-export.blue{background:rgba(124,131,253,.1);border-color:rgba(124,131,253,.3);color:#7c83fd;}
+.btn-export.blue:hover{background:rgba(124,131,253,.2);}
+.btn-export.red{background:rgba(243,139,168,.08);border-color:rgba(243,139,168,.25);color:#f38ba8;}
+.btn-export.red:hover{background:rgba(243,139,168,.15);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:#1c1c28;border:1px solid #2a2a3d;border-radius:16px;padding:24px;max-width:500px;width:100%;}
+.modal-box h2{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;}
+.modal-box p{font-size:13px;color:#6b6b8a;margin-bottom:16px;line-height:1.6;}
+.modal-textarea{width:100%;background:#16161f;border:1px solid #2a2a3d;border-radius:8px;color:#e8e8f0;font-family:'DM Mono',monospace;font-size:11px;padding:12px;height:160px;resize:vertical;outline:none;margin-bottom:12px;transition:border .15s;}
+.modal-textarea:focus{border-color:#7c83fd;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+
+@media(max-width:600px){
+  .score-row{grid-template-columns:repeat(2,1fr);}
+  .week-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">2026 YILLIK TAKİP SİSTEMİ</div>
+  <h1><span>Haftalık</span> Performans</h1>
+  <p>23 Şubat 2026'dan itibaren tüm yıl — hafta hafta bağımsız görev listeleri</p>
+  <div class="hero-stats">
+    <div class="hero-stat">Toplam: <strong id="stat-weeks">0</strong> hafta</div>
+    <div class="hero-stat">Yıl not ort.: <strong id="stat-avg">—</strong> / 10</div>
+    <div class="hero-stat">En iyi not: <strong id="stat-best">—</strong></div>
+  </div>
+</div>
+
+<div class="data-bar">
+  <span class="data-bar-label">VERİ YÖNETİMİ</span>
+  <button class="btn-export blue" onclick="syncFromCloud()">☁️ Senkronize Et</button>
+    <button class="btn-export green" onclick="exportData()">⬇️ Yedek Al</button>
+  <button class="btn-export blue" onclick="showImport()">⬆️ Yedek Yükle</button>
+  <button class="btn-export red" onclick="resetAllData()">🗑 Sıfırla</button>
+</div>
+
+<div class="q-tabs">
+  <button class="q-tab active" onclick="showQ(0,this)">🗓 Q1 · Şub–Mar</button>
+  <button class="q-tab" onclick="showQ(1,this)">🗓 Q2 · Nis–Haz</button>
+  <button class="q-tab" onclick="showQ(2,this)">🗓 Q3 · Tem–Eyl</button>
+  <button class="q-tab" onclick="showQ(3,this)">🗓 Q4 · Eki–Ara</button>
+  <button class="q-tab" onclick="showQ(4,this)">📊 Yıl Özeti</button>
+  <button class="q-tab" onclick="showQ(5,this)">📈 Grafikler</button>
+</div>
+
+<div class="week-selector-wrap" id="week-selector-wrap"></div>
+<div class="container" id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   WEEK GENERATION — Start: 23 Feb 2026 (Monday)
+══════════════════════════════════════════════════════════ */
+const START = new Date(2026,1,23); // Feb=1
+const DAYS_SHORT = ['Pzt','Sal','Çar','Per','Cum','Cts','Paz'];
+const MONTHS_TR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function fmtDate(d){return `${d.getDate()} ${MONTHS_TR[d.getMonth()]}`;}
+function fmtDateShort(d){return `${d.getDate()}/${d.getMonth()+1}`;}
+
+// Generate all weeks of 2026 starting from 23 Feb
+const WEEKS = [];
+let cur = new Date(START);
+let wNum = 1;
+const END_OF_YEAR = new Date(2026,11,31);
+while(cur <= END_OF_YEAR) {
+  const mon = new Date(cur);
+  const sun = addDays(cur,6);
+  WEEKS.push({
+    idx: WEEKS.length,
+    num: wNum++,
+    mon, sun,
+    label: `H${WEEKS.length+1}`,
+    dateLabel: `${fmtDate(mon)} – ${fmtDate(sun)}`,
+    shortLabel: `${fmtDateShort(mon)}`,
+    month: mon.getMonth(),
+    quarter: Math.floor(mon.getMonth()/3),
+  });
+  cur = addDays(cur,7);
+}
+
+// Quarter groupings (by actual quarter of start month)
+// Q1=Feb-Mar(0-1 but starts Feb), Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec
+const Q_LABELS = ['Şub–Mar','Nis–Haz','Tem–Eyl','Eki–Ara'];
+const Q_WEEKS = [
+  WEEKS.filter(w=>w.month<=2),   // Feb,Mar (month 1,2)
+  WEEKS.filter(w=>w.month>=3&&w.month<=5),
+  WEEKS.filter(w=>w.month>=6&&w.month<=8),
+  WEEKS.filter(w=>w.month>=9),
+];
+
+/* ══════════════════════════════════════════════════════════
+   DEFAULT CATEGORIES (template)
+══════════════════════════════════════════════════════════ */
+const DEFAULT_CATS = [
+  {name:'Dijital Pazarlama',color:'#4c9be8',target:10,tasks:[
+    {name:'Müşteri Analizi & Raporlama',pts:2,sessions:1},
+    {name:'İçerik Takvimi Hazırlama',pts:2,sessions:1},
+    {name:'Sosyal Medya Paylaşımları',pts:2,sessions:1},
+    {name:'Reklam Kampanyası Takibi',pts:2,sessions:1},
+    {name:'Müşteri Geri Bildirim Raporu',pts:2,sessions:1},
+  ]},
+  {name:'YouTube Kanalı',color:'#f38ba8',target:9,tasks:[
+    {name:'Senaryo Yazımı',pts:3,sessions:1},
+    {name:'Video Çekimi',pts:3,sessions:1},
+    {name:'Kurgu & Edit',pts:3,sessions:1},
+  ]},
+  {name:'AI Influencer',color:'#57c97a',target:6,tasks:[
+    {name:'AI Görsel/Video Üretimi',pts:2,sessions:1},
+    {name:'Marka Kimliği Geliştirme',pts:2,sessions:1},
+    {name:'Paylaşım & Büyüme Analizi',pts:2,sessions:1},
+  ]},
+  {name:'İngilizce',color:'#fab387',target:6,tasks:[
+    {name:'Kelime & Gramer Çalışması',pts:2,sessions:1},
+    {name:'Dinleme & Okuma Pratiği',pts:2,sessions:1},
+    {name:'Konuşma / Yazma Pratiği',pts:2,sessions:1},
+  ]},
+  {name:'Kişisel Gelişim',color:'#cba6f7',target:4,tasks:[
+    {name:'İçerik Tüketimi (Kitap/Podcast)',pts:2,sessions:1},
+    {name:'Not Alma & Uygulama',pts:2,sessions:1},
+  ]},
+];
+
+/* ══════════════════════════════════════════════════════════
+   STATE
+   weekCats[weekIdx] = cats array (independent per week)
+   weekData[weekIdx][ci][ti][di] = 0|1
+══════════════════════════════════════════════════════════ */
+
+// ── SUPABASE SYNC ──
+const SB_URL = 'https://luiukheidcnyyqkblgzx.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1aXVraGVpZGNueXlxa2JsZ3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NTgyMDIsImV4cCI6MjA4NzUzNDIwMn0.zqjStSUJHrY6Ed_TTyb0ujeYmfkXfLtbpmNWrW0Npi8';
+
+async function sbGet(key) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/performans?key=eq.${key}&select=value`, {
+      headers: {'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY}
+    });
+    const d = await r.json();
+    return d && d[0] ? JSON.parse(d[0].value) : null;
+  } catch(e) { return null; }
+}
+
+async function sbSet(key, value) {
+  try {
+    await fetch(`${SB_URL}/rest/v1/performans`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({key, value: JSON.stringify(value)})
+    });
+  } catch(e) {}
+}
+
+async function syncFromCloud() {
+  const wc = await sbGet('wc26');
+  const wd = await sbGet('wd26');
+  if(wc) { weekCats = wc; localStorage.setItem('wc26', JSON.stringify(wc)); }
+  if(wd) { weekData = wd; localStorage.setItem('wd26', JSON.stringify(wd)); }
+  if(wc || wd) { renderAll(); toast('☁️ Veriler senkronize edildi'); }
+}
+
+let _saveTimer = null;
+function saveToCloud() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async () => {
+    await sbSet('wc26', weekCats);
+    await sbSet('wd26', weekData);
+  }, 1500);
+}
+
+let weekCats = JSON.parse(localStorage.getItem('wc26') || 'null') || {};
+let weekData = JSON.parse(localStorage.getItem('wd26') || 'null') || {};
+
+// ── GÖMÜLÜ VERİ ──
+(function() {
+  const _stored_wc = localStorage.getItem('wc26');
+  const _stored_wd = localStorage.getItem('wd26');
+  if(!_stored_wc && !_stored_wd) {
+    const _d = {"version": 1, "exportedAt": "2026-02-24T22:24:58.592Z", "weekCats": {"0": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 25, "tasks": [{"name": "Centrum-emre hoca içerik çalışması", "pts": 5, "sessions": 1}, {"name": "samet hoca istediği 2 tasarım yap.", "pts": 4, "sessions": 2}, {"name": "sanem reels video editle", "pts": 2, "sessions": 1}, {"name": "sanem uzun video revize", "pts": 1, "sessions": 1}, {"name": "terzi atolye facebook kurulum", "pts": 3, "sessions": 1}, {"name": "markalara KPI çalışması", "pts": 6, "sessions": 2}, {"name": "hümeyra 3 paylaşım hazırla", "pts": 4, "sessions": 3}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Youtube Niş Araştır", "pts": 9, "sessions": 6}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "en az 5 paylaşım yap.", "pts": 6, "sessions": 5}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "pratika çalışması - 3 oturum", "pts": 2, "sessions": 3}, {"name": "youtube video izle ingilizce", "pts": 2, "sessions": 3}, {"name": "ingilizce kelime uygulaması - 3 oturum", "pts": 2, "sessions": 3}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 5, "tasks": [{"name": "iktidar kitabı 3 bölüm oku", "pts": 1, "sessions": 3}, {"name": "daha sonra izle listesinden 5 video izle", "pts": 1, "sessions": 5}, {"name": "bulut abi önerdiği 1 film izle", "pts": 1, "sessions": 1}, {"name": "stoa kitabı  her gün 1 bölüm oku", "pts": 1, "sessions": 7}, {"name": "kitap dinle - 3 oturum", "pts": 1, "sessions": 3}]}], "1": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Centrum-emre hoca içerik çalışması", "pts": 5, "sessions": 1}, {"name": "samet hoca istediği 2 tasarım yap.", "pts": 4, "sessions": 2}, {"name": "sanem reels video editle", "pts": 2, "sessions": 1}, {"name": "sanem uzun video revize", "pts": 1, "sessions": 1}, {"name": "terzi atolye facebook kurulum", "pts": 3, "sessions": 1}, {"name": "hümeyra 3 paylaşım hazırla", "pts": 4, "sessions": 1}, {"name": "markalara KPI çalışması", "pts": 6, "sessions": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Youtube Niş Araştır", "pts": 9, "sessions": 6}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "en az 5 paylaşım yap.", "pts": 6, "sessions": 5}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "pratika çalışması - 3 oturum", "pts": 2, "sessions": 3}, {"name": "youtube video izle ingilizce", "pts": 2, "sessions": 3}, {"name": "ingilizce kelime uygulaması - 3 oturum", "pts": 2, "sessions": 3}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 5, "tasks": [{"name": "iktidar kitabı 3 bölüm oku", "pts": 1, "sessions": 3}, {"name": "daha sonra izle listesinden 5 video izle", "pts": 1, "sessions": 5}, {"name": "bulut abi önerdiği 1 film izle", "pts": 1, "sessions": 1}, {"name": "stoa kitabı  her gün 1 bölüm oku", "pts": 1, "sessions": 7}, {"name": "kitap dinle - 3 oturum", "pts": 1, "sessions": 3}]}], "2": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "3": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "4": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "5": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "6": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "7": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "8": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "9": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "10": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "11": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "12": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "13": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "14": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "15": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "16": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "17": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "18": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "19": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "20": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "21": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "22": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "23": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "24": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "25": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "26": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "27": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "28": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "29": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "30": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "31": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "32": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "33": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "34": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "35": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "36": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "37": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "38": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "39": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "40": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "41": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "42": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "43": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}], "44": [{"name": "Dijital Pazarlama", "color": "#4c9be8", "target": 10, "tasks": [{"name": "Müşteri Analizi & Raporlama", "pts": 2}, {"name": "İçerik Takvimi Hazırlama", "pts": 2}, {"name": "Sosyal Medya Paylaşımları", "pts": 2}, {"name": "Reklam Kampanyası Takibi", "pts": 2}, {"name": "Müşteri Geri Bildirim Raporu", "pts": 2}]}, {"name": "YouTube Kanalı", "color": "#f38ba8", "target": 9, "tasks": [{"name": "Senaryo Yazımı", "pts": 3}, {"name": "Video Çekimi", "pts": 3}, {"name": "Kurgu & Edit", "pts": 3}]}, {"name": "AI Influencer", "color": "#57c97a", "target": 6, "tasks": [{"name": "AI Görsel/Video Üretimi", "pts": 2}, {"name": "Marka Kimliği Geliştirme", "pts": 2}, {"name": "Paylaşım & Büyüme Analizi", "pts": 2}]}, {"name": "İngilizce", "color": "#fab387", "target": 6, "tasks": [{"name": "Kelime & Gramer Çalışması", "pts": 2}, {"name": "Dinleme & Okuma Pratiği", "pts": 2}, {"name": "Konuşma / Yazma Pratiği", "pts": 2}]}, {"name": "Kişisel Gelişim", "color": "#cba6f7", "target": 4, "tasks": [{"name": "İçerik Tüketimi (Kitap/Podcast)", "pts": 2}, {"name": "Not Alma & Uygulama", "pts": 2}]}]}, "weekData": {"0": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0]], [[0, 1, 0, 0, 0, 0, 0], [0, 2, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0]]], "1": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "2": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "3": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "4": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "5": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "6": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "7": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "8": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "9": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "10": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "11": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "12": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "13": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "14": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "15": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "16": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "17": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "18": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "19": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "20": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "21": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "22": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "23": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "24": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "25": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "26": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "27": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "28": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "29": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "30": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "31": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "32": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "33": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "34": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "35": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "36": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "37": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "38": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "39": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "40": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "41": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "42": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "43": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], "44": [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]]}};
+    if(_d.weekCats) { weekCats = _d.weekCats; localStorage.setItem('wc26', JSON.stringify(_d.weekCats)); }
+    if(_d.weekData) { weekData = _d.weekData; localStorage.setItem('wd26', JSON.stringify(_d.weekData)); }
+  }
+})();
+
+
+function getCats(wi) {
+  if(!weekCats[wi]) weekCats[wi] = JSON.parse(JSON.stringify(DEFAULT_CATS));
+  return weekCats[wi];
+}
+
+function getData(wi) {
+  if(!weekData[wi]) {
+    const cats = getCats(wi);
+    weekData[wi] = cats.map(cat=>cat.tasks.map(()=>Array(7).fill(0)));
+  }
+  return weekData[wi];
+}
+
+function syncWeekData(wi) {
+  const cats = getCats(wi);
+  const old = weekData[wi] || [];
+  weekData[wi] = cats.map((cat,ci)=>cat.tasks.map((_,ti)=>(old[ci]?.[ti])||Array(7).fill(0)));
+}
+
+function save() {
+  try {
+    localStorage.setItem('wc26', JSON.stringify(weekCats));
+    localStorage.setItem('wd26', JSON.stringify(weekData));
+    saveToCloud();
+  } catch(e) { toast('⚠️ Depolama dolu, eski veriler silinebilir'); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CALCULATIONS
+══════════════════════════════════════════════════════════ */
+// Görevin kazandığı puan: sessions>1 ise oturum oranına göre ölçeklenir
+// Örnek: pts=3, sessions=5, 3 gün yapıldı → 3*(3/5) = 1.8 puan
+function taskEarned(wi,ci,ti) {
+  const cats=getCats(wi), d=getData(wi);
+  const task=cats[ci].tasks[ti];
+  const sessions=task.sessions||1;
+  const done=(d[ci]?.[ti]||[]).reduce((a,b)=>a+b,0);
+  if(sessions===1) {
+    // Tek oturum: ya tam ya sıfır (eski davranış)
+    return done>=1 ? task.pts : 0;
+  }
+  // Çoklu oturum: orana göre puan, sessions'ı geçemez
+  const completed=Math.min(done,sessions);
+  return +(task.pts*(completed/sessions)).toFixed(2);
+}
+function catTotal(wi,ci) {
+  const cats=getCats(wi);
+  return +cats[ci].tasks.reduce((s,_,ti)=>s+taskEarned(wi,ci,ti),0).toFixed(2);
+}
+function weekTotal(wi) {
+  const cats=getCats(wi);
+  return +cats.reduce((s,_,ci)=>s+catTotal(wi,ci),0).toFixed(2);
+}
+function weekTarget(wi) { return getCats(wi).reduce((s,c)=>s+c.target,0); }
+function weekPct(wi) { const t=weekTarget(wi); return t?Math.round(weekTotal(wi)/t*100):0; }
+function hasData(wi) { return weekTotal(wi)>0; }
+
+// 10 uzerinden not sistemi
+function calcGrade(pct) { return +(pct/10).toFixed(1); }
+function gradeInfo(g) {
+  if(g>=9) return {emoji:'🏆',text:'Mükemmel',cls:'pill-great',color:'var(--green)'};
+  if(g>=7) return {emoji:'✅',text:'İyi',cls:'pill-ok',color:'var(--accent)'};
+  if(g>=5) return {emoji:'⚠️',text:'Orta',cls:'pill-mid',color:'var(--orange)'};
+  return {emoji:'❌',text:'Geliştir',cls:'pill-low',color:'var(--red)'};
+}
+function pill(pct) {
+  const g=calcGrade(pct);
+  const {emoji,text,cls}=gradeInfo(g);
+  return `<span class="pill ${cls}">${emoji} ${text} · <strong>${g.toFixed(1)}/10</strong></span>`;
+}
+
+function updateHeroStats() {
+  const withData = WEEKS.filter(w=>hasData(w.idx));
+  const avgGrade = withData.length
+    ? (withData.reduce((s,w)=>s+calcGrade(weekPct(w.idx)),0)/withData.length).toFixed(1)
+    : '—';
+  const best = withData.length
+    ? withData.reduce((b,w)=>weekPct(w.idx)>weekPct(b.idx)?w:b)
+    : null;
+  const g=id=>document.getElementById(id);
+  if(g('stat-weeks')) g('stat-weeks').textContent=WEEKS.length;
+  if(g('stat-avg')) g('stat-avg').textContent=avgGrade;
+  if(g('stat-best')) g('stat-best').textContent=best?`${best.label} (${calcGrade(weekPct(best.idx)).toFixed(1)}/10)`:'—';
+}
+
+/* ══════════════════════════════════════════════════════════
+   WEEK PAGE
+══════════════════════════════════════════════════════════ */
+let currentWI = 0;
+
+function buildWeekPage(wi) {
+  currentWI = wi;
+  const cats=getCats(wi), data=getData(wi);
+  const total=weekTotal(wi), tgt=weekTarget(wi), pct=tgt?Math.round(total/tgt*100):0;
+  const gc=`1fr auto ${DAYS_SHORT.map(()=>'30px').join(' ')}`;
+
+  let html=`
+    <div class="week-header-bar">
+      <div>
+        <div class="week-title">${WEEKS[wi].label} · <span>${WEEKS[wi].dateLabel}</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace">
+          Hafta hedef tavanı: <span style="color:var(--accent);font-weight:600">${tgt} puan</span>
+          &nbsp;·&nbsp; Başarı notu bu tavana göre hesaplanır
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-copy" onclick="showSettings(${wi})">⚙️ Bu Haftayı Düzenle</button>
+        <button class="btn-copy" onclick="copyFromPrev(${wi})">📋 Önceki Haftadan Kopyala</button>
+      </div>
+    </div>
+    <div class="score-row">
+      <div class="score-card accent">
+        <div class="sc-label">Toplam Puan</div>
+        <div class="sc-val" id="wtotal-${wi}">${Number.isInteger(total)?total:total.toFixed(1)}</div>
+        <div class="sc-sub">/ ${tgt} puan</div>
+      </div>
+      <div class="score-card" style="border-color:var(--accent);background:rgba(124,131,253,.06)">
+        <div class="sc-label">10 Üzerinden Not</div>
+        <div class="sc-val" id="wpct-${wi}" style="color:var(--accent)">${calcGrade(pct).toFixed(1)}</div>
+        <div class="sc-sub" id="wpill-${wi}">${pill(pct)}</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Başarı %</div>
+        <div class="sc-val" id="wpct3-${wi}" style="font-size:22px">${pct}%</div>
+        <div class="sc-sub">${total} / ${tgt} puan</div>
+      </div>
+      ${cats.map((cat,ci)=>`
+        <div class="score-card">
+          <div class="sc-label" style="color:${cat.color}">${cat.name.split(' ')[0]}</div>
+          <div class="sc-val" id="wcat-${wi}-${ci}" style="color:${cat.color}">${catTotal(wi,ci)}</div>
+          <div class="sc-sub">/ ${cat.target}p</div>
+        </div>`).join('')}
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Haftalık İlerleme (${total}/${tgt}p)</span><span id="wpct2-${wi}">${pct}% → Not: ${calcGrade(pct).toFixed(1)}/10</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="wbar-${wi}" style="width:${pct}%"></div></div>
+    </div>`;
+
+  cats.forEach((cat,ci)=>{
+    html+=`<div class="task-table">
+      <div class="cat-header" style="background:${cat.color}20;color:${cat.color}">
+        <div class="cat-dot" style="background:${cat.color}"></div>${cat.name}
+        <span class="tgt-badge" style="background:${cat.color}20;color:${cat.color}">Hedef: ${cat.target}p</span>
+      </div>
+      <div class="day-headers" style="grid-template-columns:${gc}">
+        <span style="text-align:left;width:auto;font-size:9px;color:var(--muted);letter-spacing:1px">GÖREV</span>
+        <span class="dh-span" style="width:27px">PTS</span>
+        ${DAYS_SHORT.map(d=>`<span class="dh-span">${d}</span>`).join('')}
+      </div>
+      ${cat.tasks.map((task,ti)=>`
+        <div class="task-row" style="grid-template-columns:${gc}">
+          <span class="task-name">${task.name}</span>
+          <span class="pts-badge" style="background:${cat.color}20;color:${cat.color};min-width:36px;font-size:9px;padding:2px 4px" title="${(task.sessions||1)>1?`${task.sessions} oturumda ${task.pts} puan`:`${task.pts} puan`}">
+            ${task.pts}p${(task.sessions||1)>1?`<span style="opacity:.6;font-size:8px"> /${task.sessions}</span>`:''}
+          </span>
+          ${DAYS_SHORT.map((_,di)=>{
+            const sess=task.sessions||1;
+            const val=data[ci]?.[ti]?.[di]||0;
+            const doneClass=val>=sess?'done':val>0?'partial':'';
+            return `<input type="number" min="0" max="${sess}"
+              class="day-input ${doneClass}"
+              value="${val}"
+              title="${sess>1?`Hedef: ${sess} oturum — bugün: ${val}`:''}"
+              onchange="updateCell(this,${wi},${ci},${ti},${di})">`;
+          }).join('')}
+        </div>`).join('')}
+    </div>`;
+  });
+  return html;
+}
+
+function updateCell(input,wi,ci,ti,di) {
+  const cats=getCats(wi);
+  const sessions=(cats[ci]?.tasks[ti]?.sessions)||1;
+  const val=Math.min(sessions,Math.max(0,parseInt(input.value)||0));
+  input.value=val;
+  if(!weekData[wi]) weekData[wi]=[];
+  if(!weekData[wi][ci]) weekData[wi][ci]=[];
+  if(!weekData[wi][ci][ti]) weekData[wi][ci][ti]=Array(7).fill(0);
+  weekData[wi][ci][ti][di]=val;
+  input.classList.remove('done','partial');
+  if(val>=sessions) input.classList.add('done');
+  else if(val>0) input.classList.add('partial');
+  save();
+  const total=weekTotal(wi),tgt=weekTarget(wi),pct=tgt?Math.round(total/tgt*100):0;
+  const g=id=>document.getElementById(id);
+  if(g(`wtotal-${wi}`)) g(`wtotal-${wi}`).textContent=Number.isInteger(total)?total:total.toFixed(1);
+  if(g(`wpct-${wi}`)) g(`wpct-${wi}`).textContent=calcGrade(pct).toFixed(1);
+  if(g(`wpct3-${wi}`)) g(`wpct3-${wi}`).textContent=pct+'%';
+  if(g(`wpct2-${wi}`)) g(`wpct2-${wi}`).textContent=`${pct}% → Not: ${calcGrade(pct).toFixed(1)}/10`;
+  if(g(`wbar-${wi}`)) g(`wbar-${wi}`).style.width=pct+'%';
+  if(g(`wpill-${wi}`)) g(`wpill-${wi}`).innerHTML=pill(pct);
+  if(g(`wcat-${wi}-${ci}`)) g(`wcat-${wi}-${ci}`).textContent=(t=>Number.isInteger(t)?t:t.toFixed(1))(catTotal(wi,ci));
+  updateHeroStats();
+  updateWeekBtns();
+}
+
+/* ══════════════════════════════════════════════════════════
+   COPY FROM PREVIOUS WEEK
+══════════════════════════════════════════════════════════ */
+function copyFromPrev(wi) {
+  if(wi===0){toast('İlk hafta, kopyalanacak önceki hafta yok');return;}
+  if(!confirm(`Hafta ${wi} görev listesini bu haftaya (${WEEKS[wi].label}) kopyalamak ister misin?\nMevcut bu haftanın görevleri silinecek.`)) return;
+  weekCats[wi] = JSON.parse(JSON.stringify(getCats(wi-1)));
+  syncWeekData(wi);
+  save();
+  toast('✅ Önceki haftadan kopyalandı!');
+  renderWeek(wi);
+}
+
+/* ══════════════════════════════════════════════════════════
+   SETTINGS (per-week)
+══════════════════════════════════════════════════════════ */
+function buildCatEditor(wi,cat,ci) {
+  return `<div class="cat-editor" id="ce-${wi}-${ci}">
+    <div class="cat-ed-header">
+      <div class="color-swatch" style="background:${cat.color}" title="Renk seç">
+        <input type="color" id="cp-${wi}-${ci}" class="cp-input" value="${cat.color}"
+          oninput="this.parentElement.style.background=this.value">
+      </div>
+      <input class="cat-name-in" id="cn-${wi}-${ci}" value="${cat.name}" placeholder="Kategori adı...">
+      <div class="tgt-wrap">
+        <span>Hedef:</span>
+        <input type="number" class="small-num" id="ct-${wi}-${ci}" value="${cat.target}" min="1" max="50" oninput="updatePtsWarn(${wi})">
+        <span>p</span>
+      </div>
+      <button class="btn-icon danger" onclick="removeCat(${wi},${ci})">🗑</button>
+    </div>
+    ${cat.tasks.map((task,ti)=>`
+      <div class="task-ed-row" id="tr-${wi}-${ci}-${ti}">
+        <span class="drag-h">⠿</span>
+        <input class="task-name-in" id="tn-${wi}-${ci}-${ti}" value="${task.name}" placeholder="Görev adı...">
+        <input type="number" class="small-num" id="tp-${wi}-${ci}-${ti}" value="${task.pts}" min="1" max="20" title="Puan">
+        <span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace">p</span>
+        <span style="font-size:9px;color:var(--muted);margin-left:4px" title="Haftalık oturum sayısı">×</span>
+        <input type="number" class="small-num" id="ts-${wi}-${ci}-${ti}" value="${task.sessions||1}" min="1" max="7" title="Haftalık kaç oturumda tamamlanır?">
+        <span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace" title="Oturum sayısı">otr</span>
+        <button class="btn-icon danger" onclick="removeTask(${wi},${ci},${ti})">✕</button>
+      </div>`).join('')}
+    <div class="add-task-row">
+      <span style="font-size:15px;color:var(--muted)">＋</span>
+      <input class="add-task-in" id="nt-${wi}-${ci}" placeholder="Yeni görev ekle..." onkeydown="if(event.key==='Enter')addTask(${wi},${ci})">
+      <input type="number" class="small-num" id="np-${wi}-${ci}" value="2" min="1" max="20" title="Puan">
+      <span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace">p</span>
+      <span style="font-size:9px;color:var(--muted);margin-left:2px">×</span>
+      <input type="number" class="small-num" id="ns-${wi}-${ci}" value="1" min="1" max="7" title="Haftalık oturum sayısı">
+      <span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace">otr</span>
+      <button class="btn-add" onclick="addTask(${wi},${ci})">Ekle</button>
+    </div>
+  </div>`;
+}
+
+function getPtsTotal(wi) {
+  return getCats(wi).reduce((_,__,ci)=>{
+    const el=document.getElementById(`ct-${wi}-${ci}`);
+    return _+(el?parseInt(el.value)||0:getCats(wi)[ci].target);
+  },0);
+}
+
+function updatePtsWarn(wi) {
+  const total=getPtsTotal(wi);
+  document.querySelectorAll('.pts-warn').forEach(el=>{
+    el.className='pts-warn '+(total===35?'warn-ok':'warn-bad');
+    el.textContent=total===35?`✅ Toplam hedef: ${total} / 35`:`⚠️ Toplam hedef: ${total} / 35 — 35 önerilir`;
+  });
+}
+
+function showSettings(wi) {
+  const cats=getCats(wi), tgt=weekTarget(wi);
+  const warnC=tgt===35?'warn-ok':'warn-bad';
+  const warnT=tgt===35?`✅ Toplam hedef: ${tgt} / 35`:`⚠️ Toplam hedef: ${tgt} / 35 — 35 önerilir`;
+  document.getElementById('app').innerHTML=`
+    <div class="settings-wrap">
+      <div class="settings-info">
+        <strong>⚙️ ${WEEKS[wi].label} · ${WEEKS[wi].dateLabel}</strong> haftasına özel görev düzenleyici.<br>
+        Değişiklikler yalnızca bu haftayı etkiler. Diğer haftalar korunur.
+      </div>
+      <div class="copy-notice">💡 Bir sonraki haftaya geçip "Önceki Haftadan Kopyala" diyerek bu listeyi aktarabilirsin.</div>
+      <div class="pts-warn ${warnC}">${warnT}</div>
+      <div id="se-cats">${cats.map((c,ci)=>buildCatEditor(wi,c,ci)).join('')}</div>
+      <button class="add-cat-btn" onclick="addCat(${wi})">＋ Yeni Kategori Ekle</button>
+      <div class="settings-actions">
+        <button class="btn-danger-out" onclick="resetWeek(${wi})">🗑 Bu Haftayı Sıfırla</button>
+        <button class="btn-secondary" onclick="renderWeek(${wi})">İptal</button>
+        <button class="btn-primary" onclick="saveSettings(${wi})">💾 Kaydet & Uygula</button>
+      </div>
+    </div>`;
+}
+
+function addTask(wi,ci) {
+  const inp=document.getElementById(`nt-${wi}-${ci}`);
+  const ptsEl=document.getElementById(`np-${wi}-${ci}`);
+  const sessEl=document.getElementById(`ns-${wi}-${ci}`);
+  const name=inp.value.trim(); if(!name)return;
+  const pts=parseInt(ptsEl.value)||2;
+  const sessions=Math.min(7,Math.max(1,parseInt(sessEl?.value)||1));
+  getCats(wi)[ci].tasks.push({name,pts,sessions});
+  rerenderCatEd(wi,ci);
+  setTimeout(()=>{ const el=document.getElementById(`nt-${wi}-${ci}`); if(el){el.value='';el.focus();} },30);
+}
+
+function removeTask(wi,ci,ti) {
+  getCats(wi)[ci].tasks.splice(ti,1);
+  rerenderCatEd(wi,ci);
+}
+
+function removeCat(wi,ci) {
+  if(!confirm(`"${getCats(wi)[ci].name}" silinecek. Emin misin?`)) return;
+  getCats(wi).splice(ci,1);
+  document.getElementById('se-cats').innerHTML=getCats(wi).map((c,i)=>buildCatEditor(wi,c,i)).join('');
+  updatePtsWarn(wi);
+}
+
+function addCat(wi) {
+  const pal=['#ff6b9d','#c77dff','#4cc9f0','#f72585','#06d6a0','#ffbe0b'];
+  getCats(wi).push({name:'Yeni Kategori',color:pal[getCats(wi).length%pal.length],target:5,tasks:[{name:'Yeni Görev',pts:5,sessions:1}]});
+  document.getElementById('se-cats').innerHTML=getCats(wi).map((c,i)=>buildCatEditor(wi,c,i)).join('');
+  updatePtsWarn(wi);
+  setTimeout(()=>document.getElementById(`ce-${wi}-${getCats(wi).length-1}`)?.scrollIntoView({behavior:'smooth',block:'center'}),100);
+}
+
+function rerenderCatEd(wi,ci) {
+  const el=document.getElementById(`ce-${wi}-${ci}`);
+  if(el){const tmp=document.createElement('div');tmp.innerHTML=buildCatEditor(wi,getCats(wi)[ci],ci);el.replaceWith(tmp.firstElementChild);}
+}
+
+function saveSettings(wi) {
+  const cats=getCats(wi);
+  cats.forEach((cat,ci)=>{
+    const n=document.getElementById(`cn-${wi}-${ci}`);
+    const t=document.getElementById(`ct-${wi}-${ci}`);
+    const cp=document.getElementById(`cp-${wi}-${ci}`);
+    if(n) cat.name=n.value.trim()||cat.name;
+    if(t) cat.target=parseInt(t.value)||cat.target;
+    if(cp) cat.color=cp.value;
+    cat.tasks.forEach((task,ti)=>{
+      const tn=document.getElementById(`tn-${wi}-${ci}-${ti}`);
+      const tp=document.getElementById(`tp-${wi}-${ci}-${ti}`);
+      if(tn) task.name=tn.value.trim()||task.name;
+      if(tp) task.pts=parseInt(tp.value)||task.pts;
+    });
+  });
+  syncWeekData(wi); save();
+  toast('✅ Kaydedildi!');
+  setTimeout(()=>renderWeek(wi),600);
+}
+
+function resetWeek(wi) {
+  if(!confirm(`${WEEKS[wi].label} haftasının tüm verisi silinecek ve varsayılan görevlere dönülecek. Emin misin?`)) return;
+  delete weekCats[wi]; delete weekData[wi]; save();
+  toast('🔄 Hafta sıfırlandı');
+  renderWeek(wi);
+}
+
+/* ══════════════════════════════════════════════════════════
+   YEAR OVERVIEW
+══════════════════════════════════════════════════════════ */
+function buildYearOverview() {
+  let html=`<h3 style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:14px">TÜM HAFTALAR — 2026</h3>`;
+  [0,1,2,3].forEach(q=>{
+    const qw=Q_WEEKS[q];
+    if(!qw.length) return;
+    html+=`<div style="margin-bottom:20px">
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:8px">Q${q+1} · ${Q_LABELS[q]}</div>
+      <div class="year-grid">
+        ${qw.map(w=>{
+          const pct=weekPct(w.idx);
+          const cls=hasData(w.idx)?(pct>=80?'pct-great':pct>=60?'pct-ok':pct>=40?'pct-mid':'has-data'):'';
+          return `<div class="year-cell ${cls}" onclick="jumpToWeek(${w.idx})">
+            <div>${w.label}</div>
+            <div style="font-size:8px;color:var(--muted)">${w.shortLabel}</div>
+            ${hasData(w.idx)?`<div class="yc-pct">${calcGrade(weekPct(w.idx)).toFixed(1)}/10</div><div style="font-size:8px;color:var(--muted)">${weekTotal(w.idx)}/${weekTarget(w.idx)}p</div>`:`<div style="font-size:9px;color:var(--border)">—</div>`}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function jumpToWeek(wi) {
+  const q=WEEKS[wi].quarter;
+  const adjustedQ = WEEKS[wi].month<=2?0:WEEKS[wi].month<=5?1:WEEKS[wi].month<=8?2:3;
+  currentQ=adjustedQ;
+  document.querySelectorAll('.q-tab').forEach((t,i)=>t.classList.toggle('active',i===adjustedQ));
+  renderWeekSelector(adjustedQ);
+  renderWeek(wi);
+}
+
+/* ══════════════════════════════════════════════════════════
+   CHARTS (year-wide)
+══════════════════════════════════════════════════════════ */
+let charts={};
+function buildChartsPage() {
+  return `
+    <div class="charts-grid">
+      <div class="chart-card" style="grid-column:span 2"><h3>Haftalık Toplam Puan Trendi (Tüm Yıl)</h3><canvas id="cYearLine"></canvas></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>Çeyrek Bazlı Ortalama</h3><canvas id="cQBar"></canvas></div>
+      <div class="chart-card"><h3>Başarı Oranı Dağılımı</h3><canvas id="cPieDist"></canvas></div>
+      <div class="chart-card"><h3>En Aktif Günler</h3><canvas id="cDayBar"></canvas></div>
+    </div>`;
+}
+
+function initCharts() {
+  const grid='rgba(255,255,255,.05)',tick='#6b6b8a',tt={backgroundColor:'#1c1c28',borderColor:'#2a2a3d',borderWidth:1};
+  Chart.defaults.color='#9090a0'; Chart.defaults.font.family='Space Grotesk';
+  const mk=(id,cfg)=>{if(charts[id])charts[id].destroy();const el=document.getElementById(id);if(el)charts[id]=new Chart(el,cfg);};
+
+  // Year line
+  const weeksWithLabels=WEEKS.map(w=>({l:w.shortLabel,v:hasData(w.idx)?calcGrade(weekPct(w.idx)):null,p:weekTotal(w.idx),t:weekTarget(w.idx)}));
+  mk('cYearLine',{type:'line',data:{
+    labels:weeksWithLabels.map(w=>w.l),
+    datasets:[{label:'10 Uzerinden Not',data:weeksWithLabels.map(w=>w.v),borderColor:'#7c83fd',backgroundColor:'rgba(124,131,253,.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#7c83fd',tension:0.3,fill:true,spanGaps:false},
+      {label:'Hedef (10)',data:WEEKS.map(()=>10),borderColor:'rgba(87,201,122,.25)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false},
+      {label:'Orta Sınır (5)',data:WEEKS.map(()=>5),borderColor:'rgba(250,179,135,.2)',borderWidth:1,borderDash:[3,3],pointRadius:0,fill:false}]
+  },options:{responsive:true,plugins:{legend:{labels:{usePointStyle:true,color:'#9090a0',pointStyleWidth:8}},tooltip:tt},
+    scales:{y:{min:0,max:10.5,grid:{color:grid},ticks:{color:tick,callback:v=>v+'/10'},border:{display:false}},
+      x:{grid:{display:false},ticks:{color:tick,maxTicksLimit:12,font:{size:9}},border:{display:false}}}}});
+
+  // Quarter averages
+  const qAvgs=Q_WEEKS.map(qw=>{
+    const filled=qw.filter(w=>hasData(w.idx));
+    return filled.length?(filled.reduce((s,w)=>s+calcGrade(weekPct(w.idx)),0)/filled.length).toFixed(1):0;
+  });
+  mk('cQBar',{type:'bar',data:{labels:['Q1 Şub-Mar','Q2 Nis-Haz','Q3 Tem-Eyl','Q4 Eki-Ara'],datasets:[{label:'Ort. Puan',data:qAvgs,
+    backgroundColor:['rgba(124,131,253,.75)','rgba(87,201,122,.75)','rgba(250,179,135,.75)','rgba(203,166,247,.75)'],borderRadius:8,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:tt},
+      scales:{y:{min:0,max:10,grid:{color:grid},ticks:{color:tick,callback:v=>v+'/10'},border:{display:false}},x:{grid:{display:false},ticks:{color:tick},border:{display:false}}}}});
+
+  // Success distribution
+  const grades=WEEKS.filter(w=>hasData(w.idx)).map(w=>calcGrade(weekPct(w.idx)));
+  const dist=[grades.filter(g=>g>=9).length,grades.filter(g=>g>=7&&g<9).length,grades.filter(g=>g>=5&&g<7).length,grades.filter(g=>g<5).length];
+  mk('cPieDist',{type:'doughnut',data:{labels:['🏆 Mükemel (9-10/10)','✅ İyi (7-8.9/10)','⚠️ Orta (5-6.9/10)','❌ Geliştir (<5/10)'],datasets:[{data:dist,
+    backgroundColor:['rgba(87,201,122,.8)','rgba(124,131,253,.8)','rgba(250,179,135,.8)','rgba(243,139,168,.8)'],borderColor:['#57c97a','#7c83fd','#fab387','#f38ba8'],borderWidth:2,hoverOffset:8}]},
+    options:{responsive:true,cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:'#9090a0',usePointStyle:true,padding:10,font:{size:10}}},tooltip:tt}}});
+
+  // Day activity
+  const dayTotals=Array(7).fill(0);
+  WEEKS.forEach(w=>{
+    const cats=getCats(w.idx),data=getData(w.idx);
+    cats.forEach((cat,ci)=>cat.tasks.forEach((_,ti)=>DAYS_SHORT.forEach((_,di)=>{dayTotals[di]+=(data[ci]?.[ti]?.[di]||0);})));
+  });
+  mk('cDayBar',{type:'bar',data:{labels:DAYS_SHORT,datasets:[{label:'Tamamlanan',data:dayTotals,
+    backgroundColor:'rgba(124,131,253,.7)',borderRadius:8,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:tt},
+      scales:{y:{min:0,grid:{color:grid},ticks:{color:tick},border:{display:false}},x:{grid:{display:false},ticks:{color:tick},border:{display:false}}}}});
+}
+
+/* ══════════════════════════════════════════════════════════
+   WEEK SELECTOR
+══════════════════════════════════════════════════════════ */
+let currentQ=0;
+
+function renderWeekSelector(q) {
+  const wrap=document.getElementById('week-selector-wrap');
+  if(q>=4){wrap.innerHTML='';return;}
+  const qw=Q_WEEKS[q];
+  wrap.innerHTML=`
+    <div class="week-selector-label">Hafta seçin · Q${q+1} ${Q_LABELS[q]}</div>
+    <div class="week-grid" id="wgrid">
+      ${qw.map(w=>{
+        const pct=weekPct(w.idx);
+        const pctTxt=hasData(w.idx)?`<span class="wpct">${weekTotal(w.idx)}p</span>`:'';
+        return `<button class="week-btn ${w.idx===currentWI?'active':''}" id="wbtn-${w.idx}" onclick="renderWeek(${w.idx})">
+          ${w.label}
+          <span class="wdate">${w.shortLabel}</span>
+          ${pctTxt}
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+
+function updateWeekBtns() {
+  WEEKS.forEach(w=>{
+    const btn=document.getElementById(`wbtn-${w.idx}`);
+    if(btn){
+      const pctEl=btn.querySelector('.wpct');
+      const pctTxt=hasData(w.idx)?`${calcGrade(weekPct(w.idx)).toFixed(1)}/10`:'';
+      if(pctEl) pctEl.textContent=pctTxt;
+      else if(pctTxt){const s=document.createElement('span');s.className='wpct';s.textContent=pctTxt;btn.appendChild(s);}
+    }
+  });
+  updateHeroStats();
+}
+
+function renderWeek(wi) {
+  currentWI=wi;
+  // update active btn
+  document.querySelectorAll('.week-btn').forEach(b=>b.classList.remove('active'));
+  const activebtn=document.getElementById(`wbtn-${wi}`);
+  if(activebtn) activebtn.classList.add('active');
+  document.getElementById('app').innerHTML=buildWeekPage(wi);
+}
+
+/* ══════════════════════════════════════════════════════════
+   QUARTER ROUTER
+══════════════════════════════════════════════════════════ */
+function showQ(q,tabEl) {
+  currentQ=q;
+  document.querySelectorAll('.q-tab').forEach(t=>t.classList.remove('active'));
+  if(tabEl) tabEl.classList.add('active');
+  const app=document.getElementById('app');
+  if(q===4){
+    document.getElementById('week-selector-wrap').innerHTML='';
+    app.innerHTML=buildYearOverview();
+  } else if(q===5){
+    document.getElementById('week-selector-wrap').innerHTML='';
+    app.innerHTML=buildChartsPage();
+    setTimeout(initCharts,60);
+  } else {
+    const qw=Q_WEEKS[q];
+    renderWeekSelector(q);
+    // Select first week of quarter or current if in this quarter
+    const wi = qw.find(w=>w.idx===currentWI) ? currentWI : qw[0]?.idx ?? 0;
+    renderWeek(wi);
+  }
+  updateHeroStats();
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ══════════════════════════════════════════════════════════
+   EXPORT / IMPORT / RESET
+══════════════════════════════════════════════════════════ */
+function exportData() {
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    weekCats: weekCats,
+    weekData: weekData
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toLocaleDateString('tr-TR').replace(/\./g,'-');
+  a.href = url;
+  a.download = 'haftalik-performans-' + dateStr + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ Yedek dosyası indirildi!');
+}
+
+function showImport() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'import-modal';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <h2>⬆️ Yedek Yükle</h2>
+      <p>Daha önce indirdiğin <strong>.json</strong> yedek dosyasını seç ya da içeriğini yapıştır.<br>
+      <span style="color:#f38ba8;font-size:12px">⚠️ Mevcut veriler silinecek, yerine yedekteki veriler yüklenecek.</span></p>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="loadImportFile(this)">
+      <div style="margin-bottom:12px;">
+        <button class="btn-export blue" style="width:100%;justify-content:center" onclick="document.getElementById('import-file').click()">
+          📂 Dosya Seç (.json)
+        </button>
+      </div>
+      <textarea class="modal-textarea" id="import-text" placeholder="Ya da JSON içeriğini buraya yapıştır..."></textarea>
+      <div class="modal-actions">
+        <button class="btn-export red" onclick="document.getElementById('import-modal').remove()">İptal</button>
+        <button class="btn-export green" onclick="importData()">✅ Yükle</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+}
+
+function loadImportFile(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('import-text').value = e.target.result;
+    toast('📂 Dosya yüklendi — "Yükle" butonuna bas');
+  };
+  reader.readAsText(file);
+}
+
+function importData() {
+  const text = document.getElementById('import-text').value.trim();
+  if(!text) { toast('⚠️ Önce dosya seç veya JSON yapıştır'); return; }
+  try {
+    const payload = JSON.parse(text);
+    if(!payload.weekCats && !payload.weekData) throw new Error('Gecersiz format');
+    if(!confirm('Mevcut tüm veriler silinip yedekteki veriler yüklenecek. Emin misin?')) return;
+    weekCats = payload.weekCats || {};
+    weekData = payload.weekData || {};
+    save();
+    document.getElementById('import-modal').remove();
+    toast('✅ Veriler basariyla yuklendi!');
+    renderWeekSelector(currentQ);
+    renderWeek(currentWI);
+    updateHeroStats();
+    updateWeekBtns();
+  } catch(e) {
+    toast('❌ Hatali dosya — gecerli bir yedek sec');
+  }
+}
+
+function resetAllData() {
+  if(!confirm('Tüm haftalara ait veriler ve özel görev listeleri silinecek.\nBu işlem geri alınamaz. Emin misin?')) return;
+  weekCats = {}; weekData = {};
+  save();
+  toast('🔄 Tüm veriler sıfırlandı');
+  renderWeekSelector(currentQ);
+  renderWeek(currentWI);
+  updateHeroStats();
+  updateWeekBtns();
+}
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════ */
+// Pre-init all weeks (lazy — only when accessed)
+renderWeekSelector(0);
+renderWeek(0);
+updateHeroStats();
+</script>
+<script>window.addEventListener("load", () => setTimeout(syncFromCloud, 1000));</script>
+</body>
+</html>
