@@ -354,7 +354,7 @@ async function syncFromCloud() {
   console.log('syncFromCloud wc:', wc ? 'var' : 'yok', 'wd:', wd ? 'var' : 'yok');
   if(wc) { weekCats = wc; localStorage.setItem('wc26', JSON.stringify(wc)); }
   if(wd) { weekData = wd; localStorage.setItem('wd26', JSON.stringify(wd)); }
-  if(wc || wd) { renderAll(); toast('✅ Senkronize edildi!'); }
+  if(wc || wd) { renderWeekSelector(currentQ); renderWeek(currentWI); toast('✅ Senkronize edildi!'); }
   else { toast('⚠️ Bulutta veri yok'); }
 }
 
