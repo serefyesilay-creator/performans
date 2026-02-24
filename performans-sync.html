@@ -309,50 +309,69 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 async function sbGet(key) {
   try {
-    const r = await fetch(`${SB_URL}/rest/v1/performans?key=eq.${key}&select=value`, {
-      headers: {'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY}
+    const r = await fetch(`${SB_URL}/rest/v1/performans?key=eq.${encodeURIComponent(key)}&select=value&limit=1`, {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json'
+      }
     });
+    if(!r.ok) { console.error('sbGet error', r.status, await r.text()); return null; }
     const d = await r.json();
     return d && d[0] ? JSON.parse(d[0].value) : null;
-  } catch(e) { return null; }
+  } catch(e) { console.error('sbGet exception', e); return null; }
 }
 
 async function sbSet(key, value) {
   try {
-    await fetch(`${SB_URL}/rest/v1/performans`, {
+    // First try to delete existing, then insert
+    await fetch(`${SB_URL}/rest/v1/performans?key=eq.${encodeURIComponent(key)}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY
+      }
+    });
+    const r = await fetch(`${SB_URL}/rest/v1/performans`, {
       method: 'POST',
       headers: {
         'apikey': SB_KEY,
         'Authorization': 'Bearer ' + SB_KEY,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
+        'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({key, value: JSON.stringify(value)})
+      body: JSON.stringify({key: key, value: JSON.stringify(value)})
     });
-  } catch(e) {}
+    if(!r.ok) { console.error('sbSet error', r.status, await r.text()); }
+    else { console.log('sbSet ok:', key); }
+  } catch(e) { console.error('sbSet exception', e); }
 }
 
 async function syncFromCloud() {
+  toast('☁️ Senkronize ediliyor...');
   const wc = await sbGet('wc26');
   const wd = await sbGet('wd26');
+  console.log('syncFromCloud wc:', wc ? 'var' : 'yok', 'wd:', wd ? 'var' : 'yok');
   if(wc) { weekCats = wc; localStorage.setItem('wc26', JSON.stringify(wc)); }
   if(wd) { weekData = wd; localStorage.setItem('wd26', JSON.stringify(wd)); }
-  if(wc || wd) { renderAll(); toast('☁️ Veriler senkronize edildi'); }
+  if(wc || wd) { renderAll(); toast('✅ Senkronize edildi!'); }
+  else { toast('⚠️ Bulutta veri yok'); }
 }
 
 let _saveTimer = null;
 function saveToCloud() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(async () => {
+    console.log('saveToCloud başlıyor...');
     await sbSet('wc26', weekCats);
     await sbSet('wd26', weekData);
+    console.log('saveToCloud bitti');
   }, 1500);
 }
 
 let weekCats = JSON.parse(localStorage.getItem('wc26') || 'null') || {};
 let weekData = JSON.parse(localStorage.getItem('wd26') || 'null') || {};
 
-// ── GÖMÜLÜ VERİ ──
 (function() {
   const _stored_wc = localStorage.getItem('wc26');
   const _stored_wd = localStorage.getItem('wd26');
@@ -988,6 +1007,6 @@ renderWeekSelector(0);
 renderWeek(0);
 updateHeroStats();
 </script>
-<script>window.addEventListener("load", () => setTimeout(syncFromCloud, 1000));</script>
+<script>window.addEventListener("load", () => setTimeout(syncFromCloud, 2000));</script>
 </body>
 </html>
