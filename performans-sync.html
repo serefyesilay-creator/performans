@@ -90,6 +90,26 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .day-input:focus{outline:none;border-color:var(--accent);background:rgba(124,131,253,.08);}
 .day-input.done{background:rgba(87,201,122,.15);border-color:var(--green);color:var(--green);}
 .day-input.partial{background:rgba(250,179,135,.12);border-color:var(--orange);color:var(--orange);}
+/* ── DEADLINE ── */
+.day-input.deadline-cell{box-shadow:0 0 0 2px var(--orange);border-color:var(--orange);}
+.day-input.deadline-cell.overdue{box-shadow:0 0 0 2px var(--red);border-color:var(--red);}
+.task-row.has-deadline{box-shadow:inset 3px 0 0 var(--orange);}
+.task-row.has-deadline.overdue{box-shadow:inset 3px 0 0 var(--red);background:rgba(243,139,168,.05);}
+.dl-badge{display:inline-flex;align-items:center;gap:3px;margin-left:8px;padding:1px 8px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.3px;vertical-align:middle;white-space:nowrap;}
+.dl-badge.upcoming{background:rgba(250,179,135,.16);color:var(--orange);border:1px solid rgba(250,179,135,.35);}
+.dl-badge.today{background:rgba(250,179,135,.28);color:var(--orange);border:1px solid var(--orange);box-shadow:0 0 8px rgba(250,179,135,.3);}
+.dl-badge.overdue{background:rgba(243,139,168,.18);color:var(--red);border:1px solid var(--red);animation:dlpulse 1.6s ease-in-out infinite;}
+.dl-badge.done{background:rgba(87,201,122,.14);color:var(--green);border:1px solid rgba(87,201,122,.3);}
+.free-badge{display:inline-flex;align-items:center;margin-left:8px;padding:1px 8px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);border:1px dashed var(--border);opacity:.7;vertical-align:middle;white-space:nowrap;}
+@keyframes dlpulse{0%,100%{opacity:1}50%{opacity:.5}}
+.dl-select{height:29px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:0 6px;cursor:pointer;}
+.dl-select:focus{outline:none;border-color:var(--orange);}
+.dl-legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:2px 0 16px;padding:9px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.dl-legend span{display:inline-flex;align-items:center;gap:6px;}
+.lg-chip{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+.lg-chip.up{background:var(--orange);}
+.lg-chip.od{background:var(--red);}
+.lg-chip.fr{border:1px dashed var(--muted);}
 
 /* CHARTS */
 .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:16px;}
@@ -519,6 +539,12 @@ function buildWeekPage(wi) {
     <div class="progress-wrap">
       <div class="progress-label"><span>Haftalık İlerleme (${total}/${tgt}p)</span><span id="wpct2-${wi}">${pct}% → Not: ${calcGrade(pct).toFixed(1)}/10</span></div>
       <div class="progress-bar-bg"><div class="progress-bar-fill" id="wbar-${wi}" style="width:${pct}%"></div></div>
+    </div>
+    <div class="dl-legend">
+      <span><span class="lg-chip up"></span>⏰ Deadline'lı görev</span>
+      <span><span class="lg-chip od"></span>⚠ Süresi geçti</span>
+      <span><span class="lg-chip fr"></span>Serbest — acelesi yok</span>
+      <span style="margin-left:auto;opacity:.7">Deadline'ı görev düzenleyicide ayarla ⚙️</span>
     </div>`;
 
   cats.forEach((cat,ci)=>{
@@ -532,23 +558,42 @@ function buildWeekPage(wi) {
         <span class="dh-span" style="width:27px">PTS</span>
         ${DAYS_SHORT.map(d=>`<span class="dh-span">${d}</span>`).join('')}
       </div>
-      ${cat.tasks.map((task,ti)=>`
-        <div class="task-row" style="grid-template-columns:${gc}">
-          <span class="task-name">${task.name}</span>
-          <span class="pts-badge" style="background:${cat.color}20;color:${cat.color};min-width:36px;font-size:9px;padding:2px 4px" title="${(task.sessions||1)>1?`${task.sessions} oturumda ${task.pts} puan`:`${task.pts} puan`}">
-            ${task.pts}p${(task.sessions||1)>1?`<span style="opacity:.6;font-size:8px"> /${task.sessions}</span>`:''}
+      ${cat.tasks.map((task,ti)=>{
+        const sess=task.sessions||1;
+        const totalDone=(data[ci]?.[ti]||[]).reduce((a,b)=>a+(b||0),0);
+        const isDone=totalDone>=sess;
+        const dl=(task.deadline===0||task.deadline)?task.deadline:null;
+        let rowCls='', badge='';
+        if(dl!==null){
+          const d0=new Date(addDays(WEEKS[wi].mon,dl)); d0.setHours(0,0,0,0);
+          const t0=new Date(); t0.setHours(0,0,0,0);
+          const st = isDone ? 'done' : (t0>d0 ? 'overdue' : (t0.getTime()===d0.getTime() ? 'today' : 'upcoming'));
+          rowCls = st==='overdue' ? 'has-deadline overdue' : 'has-deadline';
+          const lbl = st==='overdue' ? `⚠ ${DAYS_SHORT[dl]} · geçti`
+                    : st==='today'  ? `⏰ ${DAYS_SHORT[dl]} · bugün`
+                    : st==='done'   ? `✓ ${DAYS_SHORT[dl]} teslim`
+                    :                 `⏰ ${DAYS_SHORT[dl]}'e kadar`;
+          badge=`<span class="dl-badge ${st}">${lbl}</span>`;
+        } else {
+          badge=`<span class="free-badge">serbest</span>`;
+        }
+        return `<div class="task-row ${rowCls}" style="grid-template-columns:${gc}">
+          <span class="task-name">${task.name}${badge}</span>
+          <span class="pts-badge" style="background:${cat.color}20;color:${cat.color};min-width:36px;font-size:9px;padding:2px 4px" title="${sess>1?`${sess} oturumda ${task.pts} puan`:`${task.pts} puan`}">
+            ${task.pts}p${sess>1?`<span style="opacity:.6;font-size:8px"> /${sess}</span>`:''}
           </span>
           ${DAYS_SHORT.map((_,di)=>{
-            const sess=task.sessions||1;
             const val=data[ci]?.[ti]?.[di]||0;
             const doneClass=val>=sess?'done':val>0?'partial':'';
+            const dlCell = dl===di ? (rowCls.includes('overdue')?'deadline-cell overdue':'deadline-cell') : '';
             return `<input type="number" min="0" max="${sess}"
-              class="day-input ${doneClass}"
+              class="day-input ${doneClass} ${dlCell}"
               value="${val}"
-              title="${sess>1?`Hedef: ${sess} oturum — bugün: ${val}`:''}"
+              title="${dl===di?`⏰ Deadline günü`:sess>1?`Hedef: ${sess} oturum — bugün: ${val}`:''}"
               onchange="updateCell(this,${wi},${ci},${ti},${di})">`;
           }).join('')}
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
     </div>`;
   });
   return html;
@@ -620,6 +665,10 @@ function buildCatEditor(wi,cat,ci) {
         <span style="font-size:9px;color:var(--muted);margin-left:4px" title="Haftalık oturum sayısı">×</span>
         <input type="number" class="small-num" id="ts-${wi}-${ci}-${ti}" value="${task.sessions||1}" min="1" max="7" title="Haftalık kaç oturumda tamamlanır?">
         <span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace" title="Oturum sayısı">otr</span>
+        <select class="dl-select" id="td-${wi}-${ci}-${ti}" title="Deadline — son teslim günü (yoksa Serbest)">
+          <option value="" ${task.deadline==null?'selected':''}>Serbest</option>
+          ${DAYS_SHORT.map((d,di)=>`<option value="${di}" ${task.deadline===di?'selected':''}>⏰ ${d}</option>`).join('')}
+        </select>
         <button class="btn-icon danger" onclick="removeTask(${wi},${ci},${ti})">✕</button>
       </div>`).join('')}
     <div class="add-task-row">
@@ -630,6 +679,10 @@ function buildCatEditor(wi,cat,ci) {
       <span style="font-size:9px;color:var(--muted);margin-left:2px">×</span>
       <input type="number" class="small-num" id="ns-${wi}-${ci}" value="1" min="1" max="7" title="Haftalık oturum sayısı">
       <span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace">otr</span>
+      <select class="dl-select" id="nd-${wi}-${ci}" title="Deadline — son teslim günü (yoksa Serbest)">
+        <option value="">Serbest</option>
+        ${DAYS_SHORT.map((d,di)=>`<option value="${di}">⏰ ${d}</option>`).join('')}
+      </select>
       <button class="btn-add" onclick="addTask(${wi},${ci})">Ekle</button>
     </div>
   </div>`;
@@ -676,10 +729,12 @@ function addTask(wi,ci) {
   const inp=document.getElementById(`nt-${wi}-${ci}`);
   const ptsEl=document.getElementById(`np-${wi}-${ci}`);
   const sessEl=document.getElementById(`ns-${wi}-${ci}`);
+  const dlEl=document.getElementById(`nd-${wi}-${ci}`);
   const name=inp.value.trim(); if(!name)return;
   const pts=parseInt(ptsEl.value)||2;
   const sessions=Math.min(7,Math.max(1,parseInt(sessEl?.value)||1));
-  getCats(wi)[ci].tasks.push({name,pts,sessions});
+  const deadline = dlEl && dlEl.value!=='' ? parseInt(dlEl.value) : null;
+  getCats(wi)[ci].tasks.push({name,pts,sessions,deadline});
   rerenderCatEd(wi,ci);
   setTimeout(()=>{ const el=document.getElementById(`nt-${wi}-${ci}`); if(el){el.value='';el.focus();} },30);
 }
@@ -721,8 +776,12 @@ function saveSettings(wi) {
     cat.tasks.forEach((task,ti)=>{
       const tn=document.getElementById(`tn-${wi}-${ci}-${ti}`);
       const tp=document.getElementById(`tp-${wi}-${ci}-${ti}`);
+      const ts=document.getElementById(`ts-${wi}-${ci}-${ti}`);
+      const td=document.getElementById(`td-${wi}-${ci}-${ti}`);
       if(tn) task.name=tn.value.trim()||task.name;
       if(tp) task.pts=parseInt(tp.value)||task.pts;
+      if(ts) task.sessions=Math.min(7,Math.max(1,parseInt(ts.value)||1));
+      if(td) task.deadline = td.value!=='' ? parseInt(td.value) : null;
     });
   });
   syncWeekData(wi); save();
