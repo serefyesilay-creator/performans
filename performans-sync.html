@@ -202,9 +202,92 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .modal-textarea:focus{border-color:#7c83fd;}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
 
+/* ── HAFTA ALT BAR ── */
+.week-subnav{position:sticky;bottom:12px;z-index:50;display:flex;gap:6px;flex-wrap:wrap;margin:22px auto 0;padding:7px;background:rgba(22,22,31,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:14px;max-width:820px;box-shadow:0 8px 28px rgba(0,0,0,.4);}
+.wsn-btn{flex:1;min-width:120px;padding:10px 12px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.wsn-btn:hover{border-color:var(--accent);color:var(--text);}
+.wsn-btn.active{background:var(--accent);border-color:var(--accent);color:var(--white);}
+.wsn-btn.month{border-color:rgba(87,201,122,.4);color:var(--green);}
+.wsn-btn.month.active{background:var(--green);border-color:var(--green);color:#0f0f17;}
+.sub-intro{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+.sub-intro b{color:var(--white);}
+.sub-hint{display:block;font-size:11px;color:var(--accent);margin-top:2px;}
+
+/* ── ÖNCELİK MATRİSİ ── */
+.mx-pool{background:var(--card);border:1px dashed var(--border);border-radius:12px;padding:12px;margin-bottom:12px;}
+.mx-title{display:flex;justify-content:space-between;gap:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:9px;}
+.mx-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.mx-empty{font-size:12px;color:var(--green);}
+.mx-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;background:var(--surface);border:1px solid var(--border);font-size:12px;color:var(--text);cursor:pointer;user-select:none;-webkit-user-select:none;transition:all .15s;}
+.mx-chip:hover{border-color:var(--accent);}
+.mx-chip.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,131,253,.45);background:rgba(124,131,253,.12);}
+.mx-chip.done .mx-name{text-decoration:line-through;opacity:.55;}
+.mx-dl{font-family:'DM Mono',monospace;font-size:9px;color:var(--orange);}
+.mx-ok{color:var(--green);font-size:11px;}
+.mx-x{background:none;border:none;color:var(--muted);font-size:14px;line-height:1;cursor:pointer;padding:0 2px;}
+.mx-x:hover{color:var(--red);}
+.mx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mx-q{border:1px solid;border-radius:12px;padding:12px;min-height:150px;transition:all .15s;}
+.mx-grid.picking .mx-q{cursor:pointer;outline:2px dashed rgba(124,131,253,.5);outline-offset:-4px;}
+.mx-q.dragover{outline:2px solid var(--accent);outline-offset:-4px;}
+.mx-q-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
+.mx-q-name{font-size:13px;font-weight:700;}
+.mx-q-act{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.mx-q.q1{background:rgba(243,139,168,.06);border-color:rgba(243,139,168,.35);}.mx-q.q1 .mx-q-name{color:var(--red);}
+.mx-q.q2{background:rgba(124,131,253,.06);border-color:rgba(124,131,253,.35);}.mx-q.q2 .mx-q-name{color:var(--accent);}
+.mx-q.q3{background:rgba(250,179,135,.06);border-color:rgba(250,179,135,.35);}.mx-q.q3 .mx-q-name{color:var(--orange);}
+.mx-q.q4{background:rgba(255,255,255,.02);border-color:var(--border);}.mx-q.q4 .mx-q-name{color:var(--muted);}
+
+/* ── GÜNLÜK PLAN ── */
+.dp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.dp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;}
+.dp-card.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.dp-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);}
+.dp-day{font-size:13px;font-weight:700;color:var(--white);}
+.dp-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.dp-today{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--white);background:var(--accent);padding:2px 7px;border-radius:10px;}
+.dp-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);}
+.dp-dl{padding:6px 12px;font-size:11px;color:var(--orange);background:rgba(250,179,135,.07);border-bottom:1px solid var(--border);}
+.dp-items{padding:6px 8px;display:flex;flex-direction:column;gap:1px;}
+.dp-empty{font-size:11px;color:var(--muted);opacity:.6;padding:6px 4px;}
+.dp-item{display:grid;grid-template-columns:18px 84px 1fr auto;align-items:center;gap:6px;padding:4px 4px 4px 7px;border-radius:7px;}
+.dp-item:hover{background:rgba(255,255,255,.03);}
+.dp-item input[type=checkbox]{accent-color:var(--green);width:15px;height:15px;cursor:pointer;}
+.dp-item.done .dp-text{text-decoration:line-through;opacity:.5;}
+.dp-time{width:84px;background:transparent;border:1px solid transparent;border-radius:5px;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;padding:2px 3px;color-scheme:dark;}
+.dp-time:hover,.dp-time:focus{border-color:var(--border);outline:none;}
+.dp-text{width:100%;min-width:0;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:12.5px;padding:2px 0;outline:none;}
+.dp-text:focus{border-bottom-color:var(--accent);}
+.dp-actions{display:flex;align-items:center;gap:2px;}
+.dp-q{font-size:10px;}
+.dp-add{display:grid;grid-template-columns:84px 1fr auto;align-items:center;gap:6px;padding:8px;border-top:1px solid var(--border);margin-top:auto;}
+.dp-add .dp-time{border-color:var(--border);}
+.dp-add .dp-text::placeholder{color:var(--muted);opacity:.6;}
+.dp-from{margin:0 8px 8px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:11.5px;padding:0 6px;cursor:pointer;}
+.dp-from:focus{outline:none;border-color:var(--accent);}
+.dp-note{margin:0 8px 8px;min-height:44px;resize:vertical;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:12px;padding:7px 9px;outline:none;}
+.dp-note:focus{border-color:var(--accent);}
+
+/* ── AY HEDEFLERİ / DEĞERLENDİRME ── */
+.mo-wrap{max-width:820px;margin:0 auto;}
+.mo-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;}
+.mo-card h3{font-size:16px;font-weight:700;color:var(--white);margin-bottom:10px;}
+.mo-prompts{margin:0 0 12px 18px;font-size:12.5px;color:var(--muted);line-height:1.8;}
+.mo-text{width:100%;min-height:280px;resize:vertical;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.65;padding:14px 16px;outline:none;}
+.mo-text:focus{border-color:var(--green);}
+.mo-saved{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;}
+.mo-ref{background:rgba(87,201,122,.05);border-color:rgba(87,201,122,.25);}
+.mo-ref h3{font-size:13px;color:var(--green);}
+.mo-ref-text{white-space:pre-wrap;font-size:13px;color:var(--text);line-height:1.6;}
+.mo-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--muted);}
+.mo-stats b{color:var(--accent);}
+
 @media(max-width:600px){
   .score-row{grid-template-columns:repeat(2,1fr);}
   .week-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));}
+  .wsn-btn{min-width:calc(50% - 3px);font-size:12px;padding:9px 8px;}
+  .mx-q{min-height:120px;padding:10px;}
+  .dp-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -344,9 +427,13 @@ async function sbGet(key) {
 
 async function sbSet(key, value) {
   try {
+    const body = JSON.stringify({key: key, value: JSON.stringify(value)});
+    // keepalive: sayfa kapanırken de istek tamamlanabilsin (tarayıcı limiti ~64KB)
+    const keepalive = body.length < 60000;
     // First try to delete existing, then insert
     await fetch(`${SB_URL}/rest/v1/performans?key=eq.${encodeURIComponent(key)}`, {
       method: 'DELETE',
+      keepalive,
       headers: {
         'apikey': SB_KEY,
         'Authorization': 'Bearer ' + SB_KEY
@@ -354,13 +441,14 @@ async function sbSet(key, value) {
     });
     const r = await fetch(`${SB_URL}/rest/v1/performans`, {
       method: 'POST',
+      keepalive,
       headers: {
         'apikey': SB_KEY,
         'Authorization': 'Bearer ' + SB_KEY,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({key: key, value: JSON.stringify(value)})
+      body
     });
     if(!r.ok) { console.error('sbSet error', r.status, await r.text()); }
     else { console.log('sbSet ok:', key); }
@@ -371,26 +459,53 @@ async function syncFromCloud() {
   toast('☁️ Senkronize ediliyor...');
   const wc = await sbGet('wc26');
   const wd = await sbGet('wd26');
-  console.log('syncFromCloud wc:', wc ? 'var' : 'yok', 'wd:', wd ? 'var' : 'yok');
-  if(wc) { weekCats = wc; localStorage.setItem('wc26', JSON.stringify(wc)); }
-  if(wd) { weekData = wd; localStorage.setItem('wd26', JSON.stringify(wd)); }
-  if(wc || wd) { renderWeekSelector(currentQ); renderWeek(currentWI); toast('✅ Senkronize edildi!'); }
+  const wp = await sbGet('wp26');
+  const mn = await sbGet('mn26');
+  console.log('syncFromCloud wc:', wc ? 'var' : 'yok', 'wd:', wd ? 'var' : 'yok', 'wp:', wp ? 'var' : 'yok', 'mn:', mn ? 'var' : 'yok');
+  // Henüz buluta gönderilmemiş yerel değişikliğin üzerine yazma
+  if(wc && !_dirty.has('wc26')) { weekCats = wc; localStorage.setItem('wc26', JSON.stringify(wc)); }
+  if(wd && !_dirty.has('wd26')) { weekData = wd; localStorage.setItem('wd26', JSON.stringify(wd)); }
+  if(wp && !_dirty.has('wp26')) { weekPlan = wp; localStorage.setItem('wp26', JSON.stringify(wp)); }
+  if(mn && !_dirty.has('mn26')) { monthNotes = mn; localStorage.setItem('mn26', JSON.stringify(mn)); }
+  if(wc || wd || wp || mn) {
+    if(currentQ < 4) { renderWeekSelector(currentQ); renderWeek(currentWI); }
+    toast('✅ Senkronize edildi!');
+  }
   else { toast('⚠️ Bulutta veri yok'); }
 }
 
+// Sadece değişen anahtarlar buluta gönderilir
+const _dirty = new Set();
+const CLOUD_KEYS = {
+  wc26: () => weekCats,
+  wd26: () => weekData,
+  wp26: () => weekPlan,
+  mn26: () => monthNotes,
+};
 let _saveTimer = null;
+async function flushCloud() {
+  const keys = [..._dirty];
+  if (!keys.length) return;
+  _dirty.clear();
+  console.log('saveToCloud başlıyor...', keys);
+  for (const k of keys) await sbSet(k, CLOUD_KEYS[k]());
+  console.log('saveToCloud bitti');
+}
 function saveToCloud() {
   clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(async () => {
-    console.log('saveToCloud başlıyor...');
-    await sbSet('wc26', weekCats);
-    await sbSet('wd26', weekData);
-    console.log('saveToCloud bitti');
-  }, 1500);
+  _saveTimer = setTimeout(flushCloud, 1500);
 }
+// Sekme kapanırken / telefonda başka uygulamaya geçilirken bekleyen kaydı hemen gönder
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { clearTimeout(_saveTimer); flushCloud(); }
+});
 
 let weekCats = JSON.parse(localStorage.getItem('wc26') || 'null') || {};
 let weekData = JSON.parse(localStorage.getItem('wd26') || 'null') || {};
+// weekPlan[weekIdx] = { matrix: {"Kategori::Görev": 1-4}, days: [ {items:[{id,text,time,done,ref}], note} x7 ] }
+let weekPlan = JSON.parse(localStorage.getItem('wp26') || 'null') || {};
+// monthNotes["2026-10"] = { goal, review }
+let monthNotes = JSON.parse(localStorage.getItem('mn26') || 'null') || {};
 
 (function() {
   const _stored_wc = localStorage.getItem('wc26');
@@ -426,6 +541,23 @@ function save() {
   try {
     localStorage.setItem('wc26', JSON.stringify(weekCats));
     localStorage.setItem('wd26', JSON.stringify(weekData));
+    _dirty.add('wc26'); _dirty.add('wd26');
+    saveToCloud();
+  } catch(e) { toast('⚠️ Depolama dolu, eski veriler silinebilir'); }
+}
+
+function savePlan() {
+  try {
+    localStorage.setItem('wp26', JSON.stringify(weekPlan));
+    _dirty.add('wp26');
+    saveToCloud();
+  } catch(e) { toast('⚠️ Depolama dolu, eski veriler silinebilir'); }
+}
+
+function saveMonth() {
+  try {
+    localStorage.setItem('mn26', JSON.stringify(monthNotes));
+    _dirty.add('mn26');
     saveToCloud();
   } catch(e) { toast('⚠️ Depolama dolu, eski veriler silinebilir'); }
 }
@@ -495,11 +627,19 @@ let currentWI = 0;
 
 function buildWeekPage(wi) {
   currentWI = wi;
-  const cats=getCats(wi), data=getData(wi);
-  const total=weekTotal(wi), tgt=weekTarget(wi), pct=tgt?Math.round(total/tgt*100):0;
-  const gc=`1fr auto ${DAYS_SHORT.map(()=>'30px').join(' ')}`;
+  const role = monthRole(wi);
+  if (weekView === 'month' && !role.first && !role.last) weekView = 'tasks';
+  let body;
+  if (weekView === 'matrix') body = buildMatrixView(wi);
+  else if (weekView === 'days') body = buildDaysView(wi);
+  else if (weekView === 'month') body = buildMonthView(wi);
+  else body = buildTasksView(wi);
+  return buildWeekHeader(wi) + body + buildSubNav(wi);
+}
 
-  let html=`
+function buildWeekHeader(wi) {
+  const tgt = weekTarget(wi);
+  return `
     <div class="week-header-bar">
       <div>
         <div class="week-title">${WEEKS[wi].label} · <span>${WEEKS[wi].dateLabel}</span></div>
@@ -512,7 +652,15 @@ function buildWeekPage(wi) {
         <button class="btn-copy" onclick="showSettings(${wi})">⚙️ Bu Haftayı Düzenle</button>
         <button class="btn-copy" onclick="copyFromPrev(${wi})">📋 Önceki Haftadan Kopyala</button>
       </div>
-    </div>
+    </div>`;
+}
+
+function buildTasksView(wi) {
+  const cats=getCats(wi), data=getData(wi);
+  const total=weekTotal(wi), tgt=weekTarget(wi), pct=tgt?Math.round(total/tgt*100):0;
+  const gc=`1fr auto ${DAYS_SHORT.map(()=>'30px').join(' ')}`;
+
+  let html=`
     <div class="score-row">
       <div class="score-card accent">
         <div class="sc-label">Toplam Puan</div>
@@ -974,10 +1122,12 @@ function toast(msg){
 ══════════════════════════════════════════════════════════ */
 function exportData() {
   const payload = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     weekCats: weekCats,
-    weekData: weekData
+    weekData: weekData,
+    weekPlan: weekPlan,
+    monthNotes: monthNotes
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1035,7 +1185,10 @@ function importData() {
     if(!confirm('Mevcut tüm veriler silinip yedekteki veriler yüklenecek. Emin misin?')) return;
     weekCats = payload.weekCats || {};
     weekData = payload.weekData || {};
-    save();
+    // Eski (v1) yedeklerde plan ve ay notları yok: mevcutları silme
+    if(payload.weekPlan) weekPlan = payload.weekPlan;
+    if(payload.monthNotes) monthNotes = payload.monthNotes;
+    save(); savePlan(); saveMonth();
     document.getElementById('import-modal').remove();
     toast('✅ Veriler basariyla yuklendi!');
     renderWeekSelector(currentQ);
@@ -1048,14 +1201,329 @@ function importData() {
 }
 
 function resetAllData() {
-  if(!confirm('Tüm haftalara ait veriler ve özel görev listeleri silinecek.\nBu işlem geri alınamaz. Emin misin?')) return;
-  weekCats = {}; weekData = {};
-  save();
+  if(!confirm('Tüm haftalara ait veriler, özel görev listeleri, günlük planlar ve ay notları silinecek.\nBu işlem geri alınamaz. Emin misin?')) return;
+  weekCats = {}; weekData = {}; weekPlan = {}; monthNotes = {};
+  save(); savePlan(); saveMonth();
   toast('🔄 Tüm veriler sıfırlandı');
   renderWeekSelector(currentQ);
   renderWeek(currentWI);
   updateHeroStats();
   updateWeekBtns();
+}
+
+/* ══════════════════════════════════════════════════════════
+   HAFTA ALT SAYFALARI — Öncelik Matrisi · Günlük Plan · Ay Notları
+══════════════════════════════════════════════════════════ */
+let weekView = 'tasks';   // tasks | matrix | days | month
+let mxSelected = null;    // matriste dokunularak seçilen görevin anahtarı
+
+const QUADS = [
+  {id:1, name:'Önemli · Acil',             act:'Hemen yap',         cls:'q1', emoji:'🔴'},
+  {id:2, name:'Önemli · Acil değil',       act:'Planla',            cls:'q2', emoji:'🔵'},
+  {id:3, name:'Önemli değil · Acil',       act:'Kısa tut / devret', cls:'q3', emoji:'🟠'},
+  {id:4, name:'Önemli değil · Acil değil', act:'Sonraya at',        cls:'q4', emoji:'⚪'},
+];
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+// Görevlerin kalıcı bir id'si yok; kategori + görev adı, düzenlemelere karşı indeksten daha dayanıklı
+function taskKey(cat, task) { return cat.name + '::' + task.name; }
+
+function getPlan(wi) {
+  if (!weekPlan[wi]) weekPlan[wi] = {matrix:{}, days:[]};
+  const p = weekPlan[wi];
+  if (!p.matrix) p.matrix = {};
+  if (!Array.isArray(p.days)) p.days = [];
+  for (let i = 0; i < 7; i++) if (!p.days[i]) p.days[i] = {items:[], note:''};
+  return p;
+}
+
+function weekTasks(wi) {
+  const cats = getCats(wi), data = getData(wi), out = [];
+  cats.forEach((cat, ci) => cat.tasks.forEach((task, ti) => {
+    const done = (data[ci]?.[ti] || []).reduce((a, b) => a + (b || 0), 0) >= (task.sessions || 1);
+    out.push({
+      key: taskKey(cat, task), name: task.name, cat: cat.name, color: cat.color,
+      deadline: (task.deadline === 0 || task.deadline) ? task.deadline : null, done,
+    });
+  }));
+  return out;
+}
+
+// Bir hafta, pazartesisinin düştüğü ayın ilk/son haftası mı?
+function monthRole(wi) {
+  const w = WEEKS[wi], m = w.month, y = w.mon.getFullYear();
+  const same = WEEKS.filter(x => x.month === m && x.mon.getFullYear() === y);
+  return {
+    first: same[0]?.idx === wi,
+    last: same[same.length - 1]?.idx === wi,
+    key: `${y}-${String(m + 1).padStart(2, '0')}`,
+    month: m, year: y,
+  };
+}
+
+function setWeekView(v) {
+  weekView = v;
+  mxSelected = null;
+  rerenderView();
+  const app = document.getElementById('app');
+  const top = app.getBoundingClientRect().top + window.scrollY - 10;
+  if (window.scrollY > top) window.scrollTo({top, behavior:'smooth'});
+}
+
+function rerenderView() { document.getElementById('app').innerHTML = buildWeekPage(currentWI); }
+
+function buildSubNav(wi) {
+  const r = monthRole(wi), mn = MONTHS_TR[r.month];
+  const btn = (v, label, extra = '') =>
+    `<button class="wsn-btn ${extra} ${weekView === v ? 'active' : ''}" onclick="setWeekView('${v}')">${label}</button>`;
+  let monthBtn = '';
+  if (r.first && r.last) monthBtn = btn('month', `🌱 ${mn} Hedef & Değerlendirme`, 'month');
+  else if (r.first)      monthBtn = btn('month', `🌱 ${mn} Hedefleri`, 'month');
+  else if (r.last)       monthBtn = btn('month', `🔍 ${mn} Değerlendirmesi`, 'month');
+  return `<div class="week-subnav">
+    ${btn('tasks', '📋 Görevler')}${btn('matrix', '🎯 Öncelik Matrisi')}${btn('days', '📅 Günlük Plan')}${monthBtn}
+  </div>`;
+}
+
+/* ── ÖNCELİK MATRİSİ ── */
+function buildMatrixView(wi) {
+  const plan = getPlan(wi), tasks = weekTasks(wi);
+  const chip = t => `<span class="mx-chip ${t.done ? 'done' : ''} ${mxSelected === t.key ? 'sel' : ''}" draggable="true"
+      data-key="${esc(t.key)}" onclick="mxPick(this.dataset.key)" ondragstart="mxDragStart(event,this.dataset.key)"
+      title="${esc(t.cat)}">
+      <span class="cat-dot" style="background:${t.color}"></span>
+      <span class="mx-name">${esc(t.name)}</span>
+      ${t.deadline !== null ? `<span class="mx-dl">⏰${DAYS_SHORT[t.deadline]}</span>` : ''}
+      ${t.done ? '<span class="mx-ok">✓</span>' : ''}
+      ${plan.matrix[t.key] ? `<button class="mx-x" title="Havuza geri al" onclick="event.stopPropagation();mxUnassign(this.parentElement.dataset.key)">×</button>` : ''}
+    </span>`;
+
+  const pool = tasks.filter(t => !plan.matrix[t.key]);
+  const placed = tasks.length - pool.length;
+
+  return `
+    <div class="sub-intro">
+      <b>Öncelik Matrisi</b> — Bu haftanın görevlerini önem ve aciliyetine göre yerleştir.
+      ${mxSelected
+        ? '<span class="sub-hint">👉 Şimdi görevi koymak istediğin kutuya dokun</span>'
+        : '<span class="sub-hint">Bir göreve dokun, sonra bir kutuya dokun (bilgisayarda sürükleyebilirsin).</span>'}
+    </div>
+    <div class="mx-pool" ondragover="event.preventDefault()" ondrop="mxDrop(event,0)" onclick="mxBoxClick(event,0)">
+      <div class="mx-title"><span>Yerleştirilmemiş görevler (${pool.length})</span><span>${placed}/${tasks.length} yerleşti</span></div>
+      <div class="mx-chips">${pool.length ? pool.map(chip).join('') : '<span class="mx-empty">Tüm görevler yerleştirildi ✓</span>'}</div>
+    </div>
+    <div class="mx-grid ${mxSelected ? 'picking' : ''}">
+      ${QUADS.map(q => {
+        const inQ = tasks.filter(t => plan.matrix[t.key] === q.id);
+        return `<div class="mx-q ${q.cls}" ondragover="mxOver(event,this)" ondragleave="this.classList.remove('dragover')"
+            ondrop="mxDrop(event,${q.id})" onclick="mxBoxClick(event,${q.id})">
+          <div class="mx-q-head"><span class="mx-q-name">${q.emoji} ${q.name}</span><span class="mx-q-act">${q.act} · ${inQ.length}</span></div>
+          <div class="mx-chips">${inQ.map(chip).join('')}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function mxPick(key) { mxSelected = (mxSelected === key) ? null : key; rerenderView(); }
+function mxBoxClick(e, q) {
+  if (!mxSelected || e.target.closest('.mx-chip')) return;
+  mxPlace(q);
+}
+function mxPlace(q) {
+  if (!mxSelected) return;
+  const p = getPlan(currentWI);
+  if (q) p.matrix[mxSelected] = q; else delete p.matrix[mxSelected];
+  mxSelected = null;
+  savePlan();
+  rerenderView();
+}
+function mxUnassign(key) {
+  delete getPlan(currentWI).matrix[key];
+  if (mxSelected === key) mxSelected = null;
+  savePlan();
+  rerenderView();
+}
+function mxDragStart(e, key) { e.dataTransfer.setData('text/plain', key); e.dataTransfer.effectAllowed = 'move'; }
+function mxOver(e, el) { e.preventDefault(); el.classList.add('dragover'); }
+function mxDrop(e, q) {
+  e.preventDefault();
+  const key = e.dataTransfer.getData('text/plain');
+  if (!key) return;
+  mxSelected = key;
+  mxPlace(q);
+}
+
+/* ── GÜNLÜK PLAN ── */
+// Saati olanlar saate göre en üstte, saatsizler eklenme sırasıyla altta
+function sortedItems(items) {
+  const timed = items.filter(i => i.time).sort((a, b) => a.time.localeCompare(b.time));
+  return [...timed, ...items.filter(i => !i.time)];
+}
+
+function buildDaysView(wi) {
+  const plan = getPlan(wi), tasks = weekTasks(wi);
+  const tmap = Object.fromEntries(tasks.map(t => [t.key, t]));
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+
+  // "Haftalık görevden ekle" listesi matris önceliğine göre sıralı
+  const order = t => plan.matrix[t.key] || 5;
+  const opts = [...tasks].sort((a, b) => order(a) - order(b)).map(t => {
+    const q = QUADS.find(x => x.id === plan.matrix[t.key]);
+    return `<option value="${esc(t.key)}">${q ? q.emoji + ' ' : ''}${esc(t.name)} · ${esc(t.cat)}${t.done ? ' ✓' : ''}</option>`;
+  }).join('');
+
+  const cards = DAYS_SHORT.map((dn, di) => {
+    const date = addDays(WEEKS[wi].mon, di); date.setHours(0, 0, 0, 0);
+    const isToday = date.getTime() === t0.getTime();
+    const day = plan.days[di];
+    const doneN = day.items.filter(i => i.done).length;
+    const dls = tasks.filter(t => t.deadline === di && !t.done);
+
+    const rows = sortedItems(day.items).map(it => {
+      const ref = it.ref ? tmap[it.ref] : null;
+      const q = ref ? QUADS.find(x => x.id === plan.matrix[it.ref]) : null;
+      return `<div class="dp-item ${it.done ? 'done' : ''}" ${ref ? `style="box-shadow:inset 3px 0 0 ${ref.color}"` : ''}>
+        <input type="checkbox" ${it.done ? 'checked' : ''} onchange="dpToggle(${wi},${di},'${it.id}',this.checked)">
+        <input type="time" class="dp-time" value="${esc(it.time || '')}" onchange="dpEdit(${wi},${di},'${it.id}','time',this.value,true)">
+        <input class="dp-text" value="${esc(it.text)}" oninput="dpEdit(${wi},${di},'${it.id}','text',this.value)">
+        <span class="dp-actions">${q ? `<span class="dp-q" title="${q.name}">${q.emoji}</span>` : ''}<button class="btn-icon danger" title="Sil" onclick="dpDel(${wi},${di},'${it.id}')">×</button></span>
+      </div>`;
+    }).join('');
+
+    return `<div class="dp-card ${isToday ? 'today' : ''}">
+      <div class="dp-head">
+        <div><span class="dp-day">${dn}</span> <span class="dp-date">${fmtDate(date)}</span>${isToday ? ' <span class="dp-today">BUGÜN</span>' : ''}</div>
+        <span class="dp-count">${day.items.length ? `${doneN}/${day.items.length}` : ''}</span>
+      </div>
+      ${dls.length ? `<div class="dp-dl">⏰ Bugün teslim: ${dls.map(t => esc(t.name)).join(', ')}</div>` : ''}
+      <div class="dp-items">${rows || '<div class="dp-empty">Henüz plan yok</div>'}</div>
+      <div class="dp-add">
+        <input type="time" class="dp-time" id="dpat-${di}" title="Saat (isteğe bağlı)">
+        <input class="dp-text" id="dpa-${di}" placeholder="+ Plan ekle, Enter'a bas" onkeydown="if(event.key==='Enter')dpAdd(${wi},${di})">
+        <button class="btn-add" onclick="dpAdd(${wi},${di})">Ekle</button>
+      </div>
+      <select class="dp-from" onchange="if(this.value)dpAddTask(${wi},${di},this.value)">
+        <option value="">↳ Haftalık görevden ekle…</option>${opts}
+      </select>
+      <textarea class="dp-note" placeholder="Günün notu…" oninput="dpNote(${wi},${di},this.value)">${esc(day.note)}</textarea>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="sub-intro">
+      <b>Günlük Plan</b> — Her güne saatli ya da saatsiz plan ekle. Haftalık görevden eklediklerinin yanında matris önceliği görünür.
+      <span class="sub-hint">Buradaki işaretler puanı değiştirmez; puan için Görevler sekmesini kullan.</span>
+    </div>
+    <div class="dp-grid">${cards}</div>`;
+}
+
+function dpFind(wi, di, id) { return getPlan(wi).days[di].items.find(i => i.id === id); }
+
+function dpAdd(wi, di) {
+  const inp = document.getElementById(`dpa-${di}`), tin = document.getElementById(`dpat-${di}`);
+  const text = inp.value.trim();
+  if (!text) { inp.focus(); return; }
+  getPlan(wi).days[di].items.push({id:newId(), text, time:tin.value || '', done:false});
+  savePlan();
+  rerenderView();
+  document.getElementById(`dpa-${di}`)?.focus();
+}
+function dpAddTask(wi, di, key) {
+  const t = weekTasks(wi).find(x => x.key === key);
+  if (!t) return;
+  getPlan(wi).days[di].items.push({id:newId(), text:t.name, time:'', done:false, ref:key});
+  savePlan();
+  rerenderView();
+}
+function dpToggle(wi, di, id, val) {
+  const it = dpFind(wi, di, id); if (!it) return;
+  it.done = val;
+  savePlan();
+  rerenderView();
+}
+function dpEdit(wi, di, id, field, val, rerender) {
+  const it = dpFind(wi, di, id); if (!it) return;
+  it[field] = val;
+  savePlan();
+  if (rerender) rerenderView();
+}
+function dpDel(wi, di, id) {
+  const d = getPlan(wi).days[di];
+  d.items = d.items.filter(i => i.id !== id);
+  savePlan();
+  rerenderView();
+}
+function dpNote(wi, di, val) { getPlan(wi).days[di].note = val; savePlan(); }
+
+/* ── AY HEDEFLERİ / AY DEĞERLENDİRMESİ ── */
+function getMonthNote(key) {
+  if (!monthNotes[key]) monthNotes[key] = {goal:'', review:''};
+  return monthNotes[key];
+}
+function moEdit(key, field, val) { getMonthNote(key)[field] = val; saveMonth(); }
+
+function monthStats(m, y) {
+  const ws = WEEKS.filter(w => w.month === m && w.mon.getFullYear() === y && hasData(w.idx));
+  if (!ws.length) return null;
+  const avg = ws.reduce((s, w) => s + calcGrade(weekPct(w.idx)), 0) / ws.length;
+  const best = ws.reduce((b, w) => weekPct(w.idx) > weekPct(b.idx) ? w : b);
+  return {count:ws.length, avg:avg.toFixed(1), best:`${best.label} · ${calcGrade(weekPct(best.idx)).toFixed(1)}/10`};
+}
+
+function buildMonthView(wi) {
+  const r = monthRole(wi), mn = MONTHS_TR[r.month], note = getMonthNote(r.key);
+  const prevDate = new Date(r.year, r.month - 1, 1);
+  const prevKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+  const prevReview = monthNotes[prevKey]?.review?.trim();
+  let html = '<div class="mo-wrap">';
+
+  if (r.first) {
+    if (prevReview) html += `<div class="mo-card mo-ref">
+      <h3>🔍 ${MONTHS_TR[prevDate.getMonth()]} değerlendirmen</h3>
+      <div class="mo-ref-text">${esc(prevReview)}</div>
+    </div>`;
+    html += `<div class="mo-card">
+      <h3>🌱 ${mn} ${r.year} — Bu aydan ne bekliyorum?</h3>
+      <ul class="mo-prompts">
+        <li>Bu aydan ne bekliyorum?</li>
+        <li>Bu ay mutlaka yapmam gereken 3 şey ne?</li>
+        <li>Neye "hayır" diyeceğim, neyi bırakacağım?</li>
+        <li>Ay sonunda neyi görürsem "iyi geçti" diyeceğim?</li>
+      </ul>
+      <textarea class="mo-text" placeholder="Yazmaya başla…" oninput="moEdit('${r.key}','goal',this.value)">${esc(note.goal)}</textarea>
+      <div class="mo-saved">Yazdıkların otomatik kaydedilir.</div>
+    </div>`;
+  }
+
+  if (r.last) {
+    const st = monthStats(r.month, r.year);
+    if (!r.first && note.goal.trim()) html += `<div class="mo-card mo-ref">
+      <h3>🌱 Ay başında hedeflediklerin</h3>
+      <div class="mo-ref-text">${esc(note.goal)}</div>
+    </div>`;
+    html += `<div class="mo-card">
+      <h3>🔍 ${mn} ${r.year} — Bu ay nasıl geçti?</h3>
+      ${st ? `<div class="mo-stats">
+        <span>Veri girilen hafta: <b>${st.count}</b></span>
+        <span>Ay not ortalaması: <b>${st.avg}/10</b></span>
+        <span>En iyi hafta: <b>${st.best}</b></span>
+      </div>` : ''}
+      <ul class="mo-prompts">
+        <li>Bu ay genel olarak nasıl geçti?</li>
+        <li>Nelerde iyiydim, neyi sürdürmeliyim?</li>
+        <li>Neleri daha iyi yapabilirdim?</li>
+        <li>Gelecek aya neyi taşıyorum?</li>
+      </ul>
+      <textarea class="mo-text" placeholder="Yazmaya başla…" oninput="moEdit('${r.key}','review',this.value)">${esc(note.review)}</textarea>
+      <div class="mo-saved">Yazdıkların otomatik kaydedilir.</div>
+    </div>`;
+  }
+
+  return html + '</div>';
 }
 
 /* ══════════════════════════════════════════════════════════
