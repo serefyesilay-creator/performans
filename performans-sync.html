@@ -223,6 +223,24 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .qp-menu button:hover,.qp-menu button.cur{background:rgba(124,131,253,.14);}
 .qp-menu .qp-act{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
 .qp-menu .qp-clear{color:var(--muted);border-top:1px solid var(--border);border-radius:0 0 7px 7px;margin-top:2px;}
+.wn{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden;}
+.wn.on{border-color:rgba(250,179,135,.55);}
+.wn summary{cursor:pointer;padding:11px 14px;font-size:13px;font-weight:700;color:var(--white);list-style:none;}
+.wn summary::-webkit-details-marker{display:none;}
+.wn-hint{font-weight:500;font-size:11.5px;color:var(--muted);}
+.wn-has{font-weight:600;font-size:11.5px;color:var(--accent);}
+.man-tag{font-family:'DM Mono',monospace;font-size:10.5px;font-weight:600;color:var(--orange);letter-spacing:0;text-transform:none;}
+.wn-body{padding:0 14px 14px;}
+.wn-text{width:100%;min-height:70px;resize:vertical;background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:13px;padding:9px 11px;outline:none;}
+.wn-text:focus{border-color:var(--accent);}
+.wn-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--text);}
+.wn-chk{display:flex;align-items:center;gap:7px;cursor:pointer;}
+.wn-chk input{accent-color:var(--orange);width:16px;height:16px;}
+.wn-grade input{width:64px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--white);font-family:'DM Mono',monospace;font-size:14px;padding:4px 6px;text-align:center;}
+.wn-grade.off{opacity:.4;}
+.wn-auto{font-size:11.5px;color:var(--muted);margin-left:auto;}
+.wn-auto b{color:var(--accent);}
+.wn-foot{font-size:10.5px;color:var(--muted);margin-top:8px;}
 .rk{background:var(--card);border:1px solid rgba(250,179,135,.35);border-radius:14px;padding:14px;margin-bottom:16px;}
 .rk-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
 .rk-title{font-size:14px;font-weight:700;color:var(--white);}
@@ -644,8 +662,11 @@ function weekTotal(wi) {
   return +cats.reduce((s,_,ci)=>s+catTotal(wi,ci),0).toFixed(2);
 }
 function weekTarget(wi) { return getCats(wi).reduce((s,c)=>s+c.target,0); }
-function weekPct(wi) { const t=weekTarget(wi); return t?Math.round(weekTotal(wi)/t*100):0; }
-function hasData(wi) { return weekTotal(wi)>0; }
+// weekPlan[wi].manual = { grade: 0-10 | null, note: '' } — ani değişiklik olan haftada not + elle puan
+function manualOf(wi) { const m = weekPlan[wi]?.manual; return m && typeof m.grade === 'number' ? m : null; }
+function autoPct(wi) { const t=weekTarget(wi); return t?Math.round(weekTotal(wi)/t*100):0; }
+function weekPct(wi) { const m=manualOf(wi); return m ? Math.round(m.grade*10) : autoPct(wi); }
+function hasData(wi) { return weekTotal(wi)>0 || !!manualOf(wi); }
 
 // 10 uzerinden not sistemi
 function calcGrade(pct) { return +(pct/10).toFixed(1); }
@@ -710,9 +731,59 @@ function buildWeekHeader(wi) {
     </div>`;
 }
 
+function gradeLine(wi) {
+  const a = autoPct(wi), m = manualOf(wi);
+  return m ? `${a}% → Otomatik: ${calcGrade(a).toFixed(1)} · ✍️ Elle: ${m.grade.toFixed(1)}/10`
+           : `${a}% → Not: ${calcGrade(a).toFixed(1)}/10`;
+}
+
+/* ── HAFTA NOTU + ELLE PUAN ── */
+function getWeekManual(wi) {
+  const p = getPlan(wi);
+  if (!p.manual) p.manual = {grade: null, note: ''};
+  return p.manual;
+}
+function buildWeekNote(wi) {
+  const m = weekPlan[wi]?.manual || {grade: null, note: ''};
+  const on = typeof m.grade === 'number';
+  const open = on || (m.note || '').trim();
+  return `<details class="wn ${on ? 'on' : ''}" ${open ? 'open' : ''}>
+    <summary>📝 Hafta notu${on ? ` · <span class="man-tag">✍️ Not elle belirlendi: ${m.grade.toFixed(1)}/10</span>` : (m.note || '').trim() ? ' · <span class="wn-has">not var</span>' : ' <span class="wn-hint">— ani bir değişiklik mi oldu? (hastalık, seyahat, acil iş…)</span>'}</summary>
+    <div class="wn-body">
+      <textarea class="wn-text" id="wn-text-${wi}" placeholder="Bu hafta ne oldu? Neden planlandığı gibi gitmedi / neyi değiştirdin?" oninput="wnNote(${wi},this.value)">${esc(m.note || '')}</textarea>
+      <div class="wn-row">
+        <label class="wn-chk"><input type="checkbox" id="wn-on-${wi}" ${on ? 'checked' : ''} onchange="wnToggle(${wi},this.checked)"> Bu haftanın notunu elle belirle</label>
+        <span class="wn-grade ${on ? '' : 'off'}">
+          <input type="number" id="wn-grade-${wi}" min="0" max="10" step="0.5" value="${on ? m.grade : ''}" ${on ? '' : 'disabled'} onchange="wnGrade(${wi},this.value)"> / 10
+        </span>
+        <span class="wn-auto">Otomatik hesap: <b id="wn-auto-${wi}">${calcGrade(autoPct(wi)).toFixed(1)}</b>/10</span>
+      </div>
+      <div class="wn-foot">Elle not girilince yıl ortalaması, grafikler ve ay değerlendirmesi bu notu kullanır. Görev puanların silinmez; kutuyu kaldırınca otomatik hesaba döner.</div>
+    </div>
+  </details>`;
+}
+function wnNote(wi, v) { getWeekManual(wi).note = v; savePlan(); }
+function wnToggle(wi, on) {
+  const m = getWeekManual(wi);
+  if (on) {
+    if (!(m.note || '').trim()) toast('📝 Elle not verirken kısa bir açıklama yazmayı unutma');
+    m.grade = calcGrade(autoPct(wi));
+  } else m.grade = null;
+  savePlan(); afterManual(wi);
+}
+function wnGrade(wi, v) {
+  const n = Math.max(0, Math.min(10, parseFloat(String(v).replace(',', '.'))));
+  if (isNaN(n)) return;
+  getWeekManual(wi).grade = Math.round(n * 10) / 10;
+  savePlan(); afterManual(wi);
+}
+function afterManual(wi) {
+  rerenderView(); updateHeroStats(); updateWeekBtns();
+}
+
 function buildTasksView(wi) {
   const cats=getCats(wi), data=getData(wi);
-  const total=weekTotal(wi), tgt=weekTarget(wi), pct=tgt?Math.round(total/tgt*100):0;
+  const total=weekTotal(wi), tgt=weekTarget(wi), apct=autoPct(wi), pct=weekPct(wi), man=manualOf(wi);
   const gc=`1fr 30px auto ${DAYS_SHORT.map(()=>'30px').join(' ')}`;
   const rocks=getPlan(wi).rocks;
 
@@ -724,13 +795,13 @@ function buildTasksView(wi) {
         <div class="sc-sub">/ ${tgt} puan</div>
       </div>
       <div class="score-card" style="border-color:var(--accent);background:rgba(124,131,253,.06)">
-        <div class="sc-label">10 Üzerinden Not</div>
+        <div class="sc-label">10 Üzerinden Not${man?' · <span class="man-tag">✍️ elle</span>':''}</div>
         <div class="sc-val" id="wpct-${wi}" style="color:var(--accent)">${calcGrade(pct).toFixed(1)}</div>
         <div class="sc-sub" id="wpill-${wi}">${pill(pct)}</div>
       </div>
       <div class="score-card">
         <div class="sc-label">Başarı %</div>
-        <div class="sc-val" id="wpct3-${wi}" style="font-size:22px">${pct}%</div>
+        <div class="sc-val" id="wpct3-${wi}" style="font-size:22px">${apct}%</div>
         <div class="sc-sub">${total} / ${tgt} puan</div>
       </div>
       ${cats.map((cat,ci)=>`
@@ -741,9 +812,10 @@ function buildTasksView(wi) {
         </div>`).join('')}
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>Haftalık İlerleme (${total}/${tgt}p)</span><span id="wpct2-${wi}">${pct}% → Not: ${calcGrade(pct).toFixed(1)}/10</span></div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="wbar-${wi}" style="width:${pct}%"></div></div>
+      <div class="progress-label"><span>Haftalık İlerleme (${total}/${tgt}p)</span><span id="wpct2-${wi}">${gradeLine(wi)}</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="wbar-${wi}" style="width:${apct}%"></div></div>
     </div>
+    ${buildWeekNote(wi)}
     ${buildRocks(wi)}
     <div class="dl-legend">
       <span><span class="lg-chip up"></span>⏰ Deadline'lı görev</span>
@@ -821,13 +893,14 @@ function updateCell(input,wi,ci,ti,di) {
   if(val>=sessions) input.classList.add('done');
   else if(val>0) input.classList.add('partial');
   save();
-  const total=weekTotal(wi),tgt=weekTarget(wi),pct=tgt?Math.round(total/tgt*100):0;
+  const total=weekTotal(wi),apct=autoPct(wi),pct=weekPct(wi);
   const g=id=>document.getElementById(id);
   if(g(`wtotal-${wi}`)) g(`wtotal-${wi}`).textContent=Number.isInteger(total)?total:total.toFixed(1);
   if(g(`wpct-${wi}`)) g(`wpct-${wi}`).textContent=calcGrade(pct).toFixed(1);
-  if(g(`wpct3-${wi}`)) g(`wpct3-${wi}`).textContent=pct+'%';
-  if(g(`wpct2-${wi}`)) g(`wpct2-${wi}`).textContent=`${pct}% → Not: ${calcGrade(pct).toFixed(1)}/10`;
-  if(g(`wbar-${wi}`)) g(`wbar-${wi}`).style.width=pct+'%';
+  if(g(`wpct3-${wi}`)) g(`wpct3-${wi}`).textContent=apct+'%';
+  if(g(`wpct2-${wi}`)) g(`wpct2-${wi}`).textContent=gradeLine(wi);
+  if(g(`wbar-${wi}`)) g(`wbar-${wi}`).style.width=apct+'%';
+  if(g(`wn-auto-${wi}`)) g(`wn-auto-${wi}`).textContent=calcGrade(apct).toFixed(1);
   if(g(`wpill-${wi}`)) g(`wpill-${wi}`).innerHTML=pill(pct);
   if(g(`wcat-${wi}-${ci}`)) g(`wcat-${wi}-${ci}`).textContent=(t=>Number.isInteger(t)?t:t.toFixed(1))(catTotal(wi,ci));
   updateHeroStats();
@@ -1027,7 +1100,7 @@ function buildYearOverview() {
           return `<div class="year-cell ${cls}" onclick="jumpToWeek(${w.idx})">
             <div>${w.label}</div>
             <div style="font-size:8px;color:var(--muted)">${w.shortLabel}</div>
-            ${hasData(w.idx)?`<div class="yc-pct">${calcGrade(weekPct(w.idx)).toFixed(1)}/10</div><div style="font-size:8px;color:var(--muted)">${weekTotal(w.idx)}/${weekTarget(w.idx)}p</div>`:`<div style="font-size:9px;color:var(--border)">—</div>`}
+            ${hasData(w.idx)?`<div class="yc-pct">${manualOf(w.idx)?'✍️ ':''}${calcGrade(weekPct(w.idx)).toFixed(1)}/10</div><div style="font-size:8px;color:var(--muted)">${weekTotal(w.idx)}/${weekTarget(w.idx)}p</div>`:`<div style="font-size:9px;color:var(--border)">—</div>`}
           </div>`;
         }).join('')}
       </div>
@@ -1135,7 +1208,7 @@ function updateWeekBtns() {
     const btn=document.getElementById(`wbtn-${w.idx}`);
     if(btn){
       const pctEl=btn.querySelector('.wpct');
-      const pctTxt=hasData(w.idx)?`${calcGrade(weekPct(w.idx)).toFixed(1)}/10`:'';
+      const pctTxt=hasData(w.idx)?`${manualOf(w.idx)?'✍️':''}${calcGrade(weekPct(w.idx)).toFixed(1)}/10`:'';
       if(pctEl) pctEl.textContent=pctTxt;
       else if(pctTxt){const s=document.createElement('span');s.className='wpct';s.textContent=pctTxt;btn.appendChild(s);}
     }
