@@ -758,6 +758,8 @@ button,input,select,textarea{font-family:var(--font);}
 #ajan-sonuc{margin-top:10px;font-weight:600;}#ajan-sonuc.ok{color:var(--green);}#ajan-sonuc.err{color:var(--red);}
 .cl-btn.ghost.cl-del{color:var(--red);margin-left:auto;}
 .cl-btn.ghost.cl-del:hover{background:rgba(215,0,21,.08);}
+.rd-card.takip{box-shadow:var(--shadow),0 0 0 2px rgba(182,68,0,.35)!important;}
+.rd-takip{white-space:pre-wrap;font-size:14px;line-height:1.55;background:#fff8f2;border-radius:12px;padding:12px 14px;color:var(--text);}
 </style>
 </head>
 <body>
@@ -1156,6 +1158,7 @@ function buildClientDetail(c, wi) {
         <span>${mn} raporu <b>${clReportDone(c) ? 'gönderildi' : 'bekliyor'}</b></span>
         <span>Hitap <input class="cl-in cl-mini" value="${esc(c.hitap || '')}" placeholder="ör. Nuran Hanım" onchange="clSet('${id}','hitap',this.value.trim(),'Hitap kaydedildi')"></span>
         <span>Meta hesabı <input class="cl-in cl-mini" value="${esc(c.metaAccount || '')}" placeholder="reklam hesabı adı" onchange="clSet('${id}','metaAccount',this.value.trim(),'Meta hesabı kaydedildi')"></span>
+        <span>Ajan <select class="cl-sel" onchange="clSet('${id}','mode',this.value,'Ajan modu kaydedildi')">${[['rapor','Müşteriye rapor taslağı'],['takip','Bana takip notu']].map(([k,v]) => `<option value="${k}" ${(c.mode || 'rapor') === k ? 'selected' : ''}>${v}</option>`).join('')}</select></span>
         <span>Aylık rapor <select class="cl-sel" onchange="clSet('${id}','reportFormat',this.value,'Rapor formatı kaydedildi')">${[['mesaj','Mesaj'],['pdf','PDF + kısa mesaj'],['ikisi','İkisi de']].map(([k,v]) => `<option value="${k}" ${(c.reportFormat || 'mesaj') === k ? 'selected' : ''}>${v}</option>`).join('')}</select></span>
         <span>Ritim <select class="cl-sel" onchange="clSet('${id}','rhythmDays',Number(this.value),'Ritim güncellendi')">${[3, 4, 7].map(n => `<option value="${n}" ${n === r ? 'selected' : ''}>${n} günde bir</option>`).join('')}</select></span></div>
       <div class="cl-actions"><button class="cl-btn pri" onclick="clFocusNote('temas')">Bugün temas ettim</button>
@@ -1602,7 +1605,7 @@ function clDrafts(cid, status = 'bekliyor') {
   return Object.values(reportDrafts.drafts || {}).filter(d => d.client === cid && (!status || d.status === status))
     .sort((a, b) => b.createdAt - a.createdAt);
 }
-const RD_TYPE = {haftalik: 'Haftalık bilgi', aylik: 'Aylık rapor', uyari: 'Anında uyarı'};
+const RD_TYPE = {haftalik: 'Haftalık bilgi', aylik: 'Aylık rapor', uyari: 'Anında uyarı', takip: 'Takip notu (sana)'};
 
 /* — Rakamlar: reklam tablolarından dönem toplamları — */
 function clPeriod(c, fromIso, toIso) {
@@ -1698,7 +1701,7 @@ function buildAgentDrafts(c) {
   const ds = clDrafts(c.id);
   if (!ds.length) return '';
   const id = esc(c.id);
-  return ds.map(d => `<div class="cl-sec rd-card">
+  return ds.map(d => d.type === 'takip' ? buildTakipCard(c, d) : `<div class="cl-sec rd-card">
     <div class="cl-sec-h"><h3>🤖 Ajan taslağı · ${RD_TYPE[d.type] || 'Mesaj'}</h3><span class="cl-hint">${esc(d.period || '')} · ${clFmt(isoDay(new Date(d.createdAt)))}</span></div>
     ${(d.flags || []).length ? `<div class="rd-flags">${d.flags.map(f => `<span class="cl-pill crit">⚠ ${esc(f)}</span>`).join('')}</div>` : ''}
     ${d.notes ? `<div class="rd-note"><b>Şeref'e not:</b> ${esc(d.notes)}</div>` : ''}
@@ -1712,11 +1715,26 @@ function buildAgentDrafts(c) {
     </div>
   </div>`).join('');
 }
+function buildTakipCard(c, d) {
+  const id = esc(c.id);
+  return `<div class="cl-sec rd-card takip">
+    <div class="cl-sec-h"><h3>🤖 Ajandan sana takip notu</h3><span class="cl-hint">${clFmt(isoDay(new Date(d.createdAt)))}</span></div>
+    ${(d.flags || []).length ? `<div class="rd-flags">${d.flags.map(f => `<span class="cl-pill crit">⚠ ${esc(f)}</span>`).join('')}</div>` : ''}
+    <div class="rd-takip">${esc(d.text)}</div>
+    ${d.message ? `<div class="cl-kv"><span>Müşteriye önerilen mesaj</span></div><textarea class="cl-ta" id="rd-${d.id}" style="min-height:110px">${esc(d.message)}</textarea>` : ''}
+    <div class="cl-actions">
+      ${d.message ? `<button class="cl-btn pri" onclick="rdSend('${id}','${d.id}')">Mesajı kopyala ve gönderildi say</button>` : ''}
+      <button class="cl-btn" onclick="rdDone('${d.id}')">✓ Okudum, ilgileniyorum</button>
+    </div>
+  </div>`;
+}
+function rdDone(did) { const d = reportDrafts.drafts[did]; if (!d) return; d.status = 'okundu'; saveDrafts(); rerenderView(); toast('✓ Takip notu kapandı'); }
 function rdSend(cid, did) {
   const d = reportDrafts.drafts[did], t = document.getElementById('rd-' + did); if (!d) return;
-  const text = t ? t.value : d.text;
+  const text = t ? t.value : (d.type === 'takip' ? (d.message || '') : d.text);
   const done = () => {
-    d.text = text; d.status = 'gonderildi'; d.sentAt = Date.now(); saveDrafts();
+    if (d.type === 'takip') d.message = text; else d.text = text;
+    d.status = 'gonderildi'; d.sentAt = Date.now(); saveDrafts();
     const kind = d.type === 'aylik' ? 'rapor' : 'temas';
     const gained = clRecord(cid, kind, clToday(), 'WhatsApp', `${RD_TYPE[d.type] || 'Mesaj'} gönderildi (ajan taslağı)`);
     rerenderView();
@@ -1804,7 +1822,8 @@ function ajanOzet() {
     musteriler: clActive().map(c => {
       const last = clLast(c), ds = last ? clDaysSince(last.date) : null, r = Number(c.rhythmDays) || 4;
       return {
-        id: c.id, ad: c.name, hitap: c.hitap || '', sektor: c.sector, metaHesap: c.metaAccount || '', raporFormati: c.reportFormat || 'mesaj',
+        id: c.id, ad: c.name, mod: c.mode || 'rapor', hitap: c.hitap || '', sektor: c.sector, metaHesap: c.metaAccount || '', raporFormati: c.reportFormat || 'mesaj',
+        ilgiliKayitlar: clMentions(c),
         ritimGun: r, sonTemas: last?.date || null, sonTemastanGun: ds,
         haftalikSirasi: ds === null || ds + 1 >= r, aylikSirasi: first5 && !clReportDone(c),
         bekleyenTaslak: clDrafts(c.id).map(d => d.type), guncelDurum: c.currentStatus || '',
@@ -1812,10 +1831,28 @@ function ajanOzet() {
           neden: a.why, beklenti: a.expectation, son14: adRows(a).filter(x => x.date >= isoDay(addDays(clParse(today), -13)))
             .map(x => ({tarih: x.date, harcama: x.spend, sonuc: x.res, not: x.note})) })),
         buAyKapanan: (c.ads || []).filter(a => a.state === 'durdu' && (a.endedAt || '') >= isoDay(addDays(clParse(today), -40))).map(a => ({ad: a.name, kapanis: a.endedAt, not: a.closeNote})),
-        sonKayitlar: [...(c.notes || [])].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5).map(n => ({tarih: n.date, tur: n.kind, metin: n.text})),
+        sonKayitlar: [...(c.notes || [])].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10).map(n => ({tarih: n.date, tur: n.kind, metin: n.text})),
       };
     }),
   };
+}
+// Müşterinin adının geçtiği görevler, aylık görevler, günlük plan maddeleri ve gün notları (bu + geçen hafta)
+function clMentions(c) {
+  const key = clNorm(c.name); if (!key) return [];
+  const hit = t => clNorm(t).includes(key);
+  const out = [], now = WEEKS.findIndex(w => { const t = clParse(clToday()); return t >= w.mon && t < addDays(w.mon, 7); });
+  for (const wi of [now, now - 1].filter(x => x >= 0 && WEEKS[x])) {
+    const wl = WEEKS[wi].label;
+    weekTasks(wi).forEach(t => { if (hit(t.name)) out.push({kaynak: `${wl} görevi`, metin: t.name, durum: t.done ? 'yapıldı' : 'açık'}); });
+    const plan = weekPlan[wi];
+    (plan?.days || []).forEach((d, di) => {
+      const date = isoDay(addDays(WEEKS[wi].mon, di));
+      (d?.items || []).forEach(it => { if (hit(it.text)) out.push({kaynak: 'Günlük plan', tarih: date, metin: it.text, durum: it.done ? 'yapıldı' : 'açık'}); });
+      if (d?.note && hit(d.note)) out.push({kaynak: 'Gün notu', tarih: date, metin: d.note});
+    });
+  }
+  (monthTasks[clMonthKey()] || []).forEach(t => { if (hit(t.text)) out.push({kaynak: 'Aylık görev', metin: t.text, durum: t.done ? 'yapıldı' : 'açık'}); });
+  return out.slice(0, 25);
 }
 function ajanImport(raw) {
   let obj;
@@ -1829,7 +1866,7 @@ function ajanImport(raw) {
     // Aynı müşteri + tür için bekleyen eski taslak varsa yenisi onun yerine geçer
     clDrafts(c.id).filter(x => x.type === (d.type || 'haftalik')).forEach(x => { x.status = 'atlandi'; });
     const id = newId();
-    reportDrafts.drafts[id] = {id, client: c.id, type: RD_TYPE[d.type] ? d.type : 'haftalik', period: d.period || '', text: String(d.text),
+    reportDrafts.drafts[id] = {id, client: c.id, type: RD_TYPE[d.type] ? d.type : 'haftalik', period: d.period || '', text: String(d.text), message: d.message ? String(d.message) : '',
       rows: Array.isArray(d.rows) ? d.rows : [], flags: Array.isArray(d.flags) ? d.flags : [], notes: d.notes || '', createdAt: Date.now(), status: 'bekliyor'};
     n++;
   }
@@ -1861,8 +1898,9 @@ function clJobsToday(wi) {
   for (const c of clSorted(clActive())) {
     const h = clHealth(c), last = clLast(c);
     const doneToday = last && last.date === today;
-    if (h.cls !== 'ok') jobs.push({c, kind:'temas', text:`${c.name} — haftalık bilgi gönder`, color:h.cls === 'crit' ? 'var(--red)' : 'var(--orange)', done:false});
-    else if (doneToday && last.kind === 'temas') jobs.push({c, kind:'temas', text:`${c.name} — haftalık bilgi gönder`, color:'var(--green)', done:true});
+    const jt = (c.mode === 'takip') ? `${c.name} — takip et, iletişime geç` : `${c.name} — haftalık bilgi gönder`;
+    if (h.cls !== 'ok') jobs.push({c, kind:'temas', text:jt, color:h.cls === 'crit' ? 'var(--red)' : 'var(--orange)', done:false});
+    else if (doneToday && last.kind === 'temas') jobs.push({c, kind:'temas', text:jt, color:'var(--green)', done:true});
     if (first) {
       const rep = clReportDone(c);
       const repToday = (c.notes || []).some(n => n.kind === 'rapor' && n.date === today);
