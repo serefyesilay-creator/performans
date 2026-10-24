@@ -331,6 +331,94 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .dp-note{margin:0 8px 8px;min-height:44px;resize:vertical;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:12px;padding:7px 9px;outline:none;}
 .dp-note:focus{border-color:var(--accent);}
 
+/* ── MÜŞTERİLER (temas ritmi + reklam hafızası) ── */
+.cl-wrap{max-width:1100px;margin:0 auto;}
+.cl-stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.cl-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;color:var(--muted);display:flex;align-items:baseline;gap:7px;}
+.cl-stat b{font-family:'DM Mono',monospace;font-size:16px;color:var(--white);}
+.cl-stat.red b{color:var(--red);}.cl-stat.orange b{color:var(--orange);}
+.cl-grid{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:14px;align-items:start;}
+@media(max-width:760px){.cl-grid{grid-template-columns:minmax(0,1fr);}.cl-grid.open .cl-listcol{display:none;}.cl-grid:not(.open) .cl-detcol{display:none;}}
+.cl-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.cl-row{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:11px;align-items:center;width:100%;padding:11px 12px 11px 0;background:none;border:0;border-bottom:1px solid var(--border);text-align:left;cursor:pointer;color:var(--text);font-family:'Space Grotesk',sans-serif;}
+.cl-row:last-child{border-bottom:0;}
+.cl-row:hover,.cl-row.sel{background:rgba(255,255,255,.035);}
+.cl-row.sel{box-shadow:inset 0 0 0 1px rgba(124,131,253,.35);}
+.cl-stripe{align-self:stretch;border-radius:0 3px 3px 0;background:var(--border);}
+.cl-row.ok .cl-stripe{background:var(--green);}.cl-row.warn .cl-stripe{background:var(--orange);}.cl-row.crit .cl-stripe{background:var(--red);}
+.cl-nm{font-size:13.5px;font-weight:600;color:var(--white);}
+.cl-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cl-days{font-family:'DM Mono',monospace;font-size:11px;padding:3px 8px;border-radius:99px;white-space:nowrap;}
+.ok .cl-days,.cl-pill.ok{background:rgba(87,201,122,.12);color:var(--green);}
+.warn .cl-days,.cl-pill.warn{background:rgba(250,179,135,.13);color:var(--orange);}
+.crit .cl-days,.cl-pill.crit{background:rgba(243,139,168,.13);color:var(--red);}
+.cl-pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.05);color:var(--muted);}
+.cl-pill.acc{background:rgba(124,131,253,.14);color:var(--accent);}
+.cl-arch{padding:10px 14px 4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--border);}
+.cl-add{display:flex;flex-wrap:wrap;gap:8px;padding:11px 12px;border-top:1px solid var(--border);}
+.cl-in,.cl-ta,.cl-sel{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;}
+.cl-in:focus,.cl-ta:focus,.cl-sel:focus{border-color:var(--accent);}
+.cl-ta{resize:vertical;min-height:64px;line-height:1.5;}
+.cl-add .cl-in{flex:1 1 130px;min-width:0;width:auto;}
+.cl-empty{padding:20px 14px;font-size:12.5px;color:var(--muted);}
+.cl-det{display:flex;flex-direction:column;gap:12px;}
+.cl-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.cl-sec-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+.cl-sec-h h3{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+.cl-title{display:flex;flex-wrap:wrap;align-items:center;gap:9px;}
+.cl-title h2{font-size:19px;font-weight:700;color:var(--white);}
+.cl-meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--muted);align-items:center;}
+.cl-meta b{color:var(--text);font-weight:600;}
+.cl-meta select{width:auto;padding:3px 6px;font-size:12px;}
+.cl-actions{display:flex;flex-wrap:wrap;gap:8px;}
+.cl-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:7px 12px;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.cl-btn:hover{border-color:var(--accent);}
+.cl-btn.pri{background:var(--accent);border-color:var(--accent);color:var(--white);}
+.cl-btn.pri:hover{filter:brightness(1.08);}
+.cl-btn.ghost{background:none;border-color:transparent;color:var(--muted);}
+.cl-btn.sm{padding:5px 10px;font-size:11.5px;}
+.cl-back{display:none;}
+@media(max-width:760px){.cl-back{display:inline-flex;}}
+.cl-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;border:1px dashed var(--border);border-radius:10px;padding:11px;}
+.cl-form .full{grid-column:1/-1;}
+.cl-form label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);font-weight:600;}
+@media(max-width:520px){.cl-form{grid-template-columns:minmax(0,1fr);}}
+.cl-ads{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px;}
+.cl-ad{border:1px solid var(--border);border-radius:10px;padding:11px;display:flex;flex-direction:column;gap:7px;background:var(--surface);min-width:0;}
+.cl-ad.win{border-color:var(--green);}
+.cl-ad-t{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
+.cl-ad-t b{font-size:13px;color:var(--white);overflow-wrap:anywhere;}
+.cl-ad-t select{width:auto;padding:3px 6px;font-size:11.5px;}
+.cl-kv{font-size:12.5px;overflow-wrap:anywhere;color:var(--text);}
+.cl-kv span{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.cl-ad .cl-ta{min-height:48px;font-size:12.5px;}
+.cl-seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.cl-seg button{border:0;background:none;padding:5px 12px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
+.cl-seg button.on{background:var(--accent);color:var(--white);}
+.cl-ev{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:10px;padding:9px 0;border-top:1px solid var(--border);align-items:start;}
+.cl-ev:first-child{border-top:0;}
+.cl-ev .d{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding-top:2px;}
+.cl-ev .x{font-size:13px;overflow-wrap:anywhere;white-space:pre-wrap;color:var(--text);}
+.cl-ev .x .cl-pill{margin-right:6px;}
+.cl-todo{display:flex;flex-direction:column;gap:2px;}
+.cl-todo div{font-size:13px;color:var(--text);padding:5px 0;border-top:1px solid var(--border);}
+.cl-todo div:first-child{border-top:0;}
+.cl-todo small{color:var(--muted);font-family:'DM Mono',monospace;font-size:10.5px;margin-left:6px;}
+.cl-ph{padding:36px 20px;text-align:center;color:var(--muted);font-size:13px;}
+.cl-hint{font-size:11.5px;color:var(--muted);}
+/* Günlük Plan: müşteri küçük işleri */
+.dp-small{border-top:1px solid var(--border);padding:8px 12px 10px;background:rgba(250,179,135,.04);}
+.dp-small-h{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange);margin-bottom:4px;display:flex;justify-content:space-between;}
+.dp-small-h span{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;}
+.dp-job{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px;color:var(--text);}
+.dp-job .jt{flex:1;min-width:0;cursor:pointer;}
+.dp-job .jt:hover{color:var(--white);text-decoration:underline;}
+.dp-job.done .jt{text-decoration:line-through;opacity:.5;}
+.dp-job .jd{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dp-job button{border:1px solid var(--border);background:var(--surface);color:var(--green);border-radius:6px;padding:3px 8px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.dp-job button:hover{border-color:var(--green);}
+.temas-bonus{font-size:10.5px;color:var(--orange);font-family:'DM Mono',monospace;}
+
 /* ── AY HEDEFLERİ / DEĞERLENDİRME ── */
 .mo-wrap{max-width:820px;margin:0 auto;}
 .mo-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;}
@@ -525,6 +613,7 @@ async function syncFromCloud() {
   const wp = await sbGet('wp26');
   const mn = await sbGet('mn26');
   const mt = await sbGet('mt26');
+  const cl = await sbGet('cl26');
   console.log('syncFromCloud wc:', wc ? 'var' : 'yok', 'wd:', wd ? 'var' : 'yok', 'wp:', wp ? 'var' : 'yok', 'mn:', mn ? 'var' : 'yok');
   // Henüz buluta gönderilmemiş yerel değişikliğin üzerine yazma
   if(wc && !_dirty.has('wc26')) { weekCats = wc; localStorage.setItem('wc26', JSON.stringify(wc)); }
@@ -532,7 +621,8 @@ async function syncFromCloud() {
   if(wp && !_dirty.has('wp26')) { weekPlan = wp; localStorage.setItem('wp26', JSON.stringify(wp)); }
   if(mn && !_dirty.has('mn26')) { monthNotes = mn; localStorage.setItem('mn26', JSON.stringify(mn)); }
   if(mt && !_dirty.has('mt26')) { monthTasks = mt; localStorage.setItem('mt26', JSON.stringify(mt)); }
-  if(wc || wd || wp || mn || mt) {
+  if(cl && cl.clients && !_dirty.has('cl26')) { clientsData = cl; localStorage.setItem('cl26', JSON.stringify(cl)); }
+  if(wc || wd || wp || mn || mt || cl) {
     if(currentQ < 4) { renderWeekSelector(currentQ); renderWeek(currentWI); }
     toast('✅ Senkronize edildi!');
   }
@@ -547,6 +637,7 @@ const CLOUD_KEYS = {
   wp26: () => weekPlan,
   mn26: () => monthNotes,
   mt26: () => monthTasks,
+  cl26: () => clientsData,
 };
 let _saveTimer = null;
 async function flushCloud() {
@@ -574,6 +665,353 @@ let weekPlan = JSON.parse(localStorage.getItem('wp26') || 'null') || {};
 let monthNotes = JSON.parse(localStorage.getItem('mn26') || 'null') || {};
 // monthTasks["2026-10"] = [ {id, text, done} ] — puansız, ayın tüm haftalarında aynı liste
 let monthTasks = JSON.parse(localStorage.getItem('mt26') || 'null') || {};
+
+/* ══════════════════════════════════════════════════════════
+   MÜŞTERİLER — temas ritmi, reklam hafızası, aylık rapor (Marka Assist)
+   clientsData = { clients: { id: { id, name, sector, status:'aktif'|'arsiv', rhythmDays, currentStatus,
+                   statusUpdated, createdAt, ads:[{id,name,startedAt,why,expectation,state,result,createdAt}],
+                   notes:[{id,kind:'temas'|'not'|'rapor',date,channel,text,createdAt}] } } }
+   Son temas ve aylık rapor durumu ayrı alan değil; kayıt geçmişinden hesaplanır.
+══════════════════════════════════════════════════════════ */
+const TEMAS_PTS = 0.5;   // her temas/rapor kaydı (müşteri başına günde 1) haftaya bu kadar puan ekler
+const CL_STATE = {kazanan:'Kazanan', test:'Test', durdu:'Durduruldu'};
+const CL_KIND = {temas:'Temas', not:'Not', rapor:'Rapor'};
+const CL_CHANNELS = ['WhatsApp', 'Telefon', 'Toplantı', 'E-posta'];
+
+function clSeed() {
+  const c = (id, name, sector, i) => [id, {id, name, sector, status:'aktif', rhythmDays:4, currentStatus:'', statusUpdated:'',
+    createdAt: 1761300000000 + i, ads:[], notes:[]}];
+  const clients = Object.fromEntries([
+    c('psk-nehir', 'Psk. Nehir', 'Psikoloji', 0),
+    c('imer-dogalgaz', 'İmer Doğalgaz', 'Doğalgaz / kombi', 1),
+    c('fatma-togrul', 'Fatma Toğrul', 'Sağlık', 2),
+    c('dyt-zeynep-oz', 'Dyt. Zeynep Öz', 'Diyetisyen', 3),
+    c('centrum', 'Centrum', 'Tüp bebek', 4),
+    c('dr-nuran', 'Dr. Nuran', 'Medikal estetik', 5),
+    c('superdoc', 'Superdoc', 'Fitoterapi', 6),
+    c('butik-sude-eksi', 'Butik Sude Ekşi', 'E-ticaret giyim', 7),
+    c('dyt-asli-akturk', 'Dyt. Aslı Aktürk', 'Diyetisyen', 8),
+  ]);
+  const ad = (cid, name, startedAt, why) => clients[cid].ads.push({id:newId(), name, startedAt, why, expectation:'', state:'test', result:'', createdAt:Date.now()});
+  ad('dr-nuran', 'Takipçi amaçlı reklam', '2026-10-22', 'Takipçi artışı');
+  ad('psk-nehir', 'Kurum anlaşmaları reklamları', '2026-10-21', 'Kurum anlaşmalarını duyurmak');
+  ad('butik-sude-eksi', 'Ekim satış kampanyası', '2026-10-01', 'Satış');
+  ad('superdoc', 'WhatsApp mesaj kampanyası', '2026-10-01', 'WhatsApp üzerinden hasta mesajı');
+  return {clients};
+}
+// Yerelde kayıt yoksa başlangıç verisi bellekte kurulur ama buluta gönderilmez:
+// başka cihazda girilmiş müşteri kayıtları açılıştaki senkronla gelir, üzerine yazılmaz.
+let clientsData = JSON.parse(localStorage.getItem('cl26') || 'null') || clSeed();
+
+function saveClients() {
+  try {
+    localStorage.setItem('cl26', JSON.stringify(clientsData));
+    _dirty.add('cl26');
+    saveToCloud();
+  } catch(e) { toast('⚠️ Depolama dolu, eski veriler silinebilir'); }
+}
+
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const clToday = () => isoDay(new Date());
+const clMonthKey = () => clToday().slice(0, 7);
+const clParse = iso => { if (!iso) return null; const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
+const clFmt = iso => { const d = clParse(iso); return d ? `${d.getDate()} ${MONTHS_TR[d.getMonth()].slice(0, 3)}` : '—'; };
+const clDaysSince = iso => { const d = clParse(iso); return d ? Math.round((clParse(clToday()) - d) / 86400000) : null; };
+
+function clAll() { return Object.values(clientsData.clients || {}); }
+function clGet(id) { return (clientsData.clients || {})[id]; }
+function clActive() { return clAll().filter(c => c.status !== 'arsiv'); }
+// Son temas: tarihi en yeni temas/rapor kaydı ("not" saymaz)
+function clLast(c) {
+  let best = null;
+  for (const n of c.notes || []) if (n.kind !== 'not' && (!best || n.date > best.date || (n.date === best.date && n.createdAt > best.createdAt))) best = n;
+  return best;
+}
+function clReportDone(c) { const mk = clMonthKey(); return (c.notes || []).some(n => n.kind === 'rapor' && (n.date || '').startsWith(mk)); }
+function clHealth(c) {
+  const r = Number(c.rhythmDays) || 4, last = clLast(c), d = last ? clDaysSince(last.date) : null;
+  if (d === null) return {cls:'crit', label:'Kayıt yok', rank:9999};
+  if (d < r) return {cls:'ok', label:d === 0 ? 'Bugün' : d + ' gün', rank:d};
+  if (d < r + 3) return {cls:'warn', label:d + ' gün', rank:1000 + d};
+  return {cls:'crit', label:d + ' gün', rank:2000 + d};
+}
+function clSorted(list) {
+  return [...list].sort((a, b) => clHealth(b).rank - clHealth(a).rank || a.name.localeCompare(b.name, 'tr'));
+}
+
+// Haftaya eklenen temas puanı: o haftanın günlerinde temas/rapor kaydı olan (müşteri, gün) çifti başına 0,5
+function temasCount(wi) {
+  if (!WEEKS[wi]) return 0;
+  const from = isoDay(WEEKS[wi].mon), to = isoDay(addDays(WEEKS[wi].mon, 6));
+  let n = 0;
+  for (const c of clAll()) {
+    const days = new Set((c.notes || []).filter(x => x.kind !== 'not' && x.date >= from && x.date <= to).map(x => x.date));
+    n += days.size;
+  }
+  return n;
+}
+function temasBonus(wi) { return +(temasCount(wi) * TEMAS_PTS).toFixed(2); }
+
+// "Müşteri | iş" görevlerini müşteriyle eşle (ünvanlar ve noktalama yok sayılır)
+function clNorm(s) {
+  return String(s || '').toLocaleLowerCase('tr').replace(/\b(dr|dyt|psk|op|uzm|dkt|prof|doç)\./g, ' ')
+    .replace(/[^a-z0-9ğüşıöç ]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function clMatches(prefix, c) {
+  const a = clNorm(prefix), b = clNorm(c.name);
+  return !!a && !!b && (a === b || a.includes(b) || b.includes(a));
+}
+function clPendingTasks(c, wi) {
+  const out = [];
+  weekTasks(wi).forEach(t => {
+    const i = t.name.indexOf('|');
+    if (i > 0 && !t.done && clMatches(t.name.slice(0, i), c)) out.push({text:t.name.slice(i + 1).trim(), src:t.cat});
+  });
+  (monthTasks[monthRole(wi).key] || []).forEach(t => {
+    const i = t.text.indexOf('|');
+    if (i > 0 && !t.done && clMatches(t.text.slice(0, i), c)) out.push({text:t.text.slice(i + 1).trim(), src:MONTHS_TR[monthRole(wi).month] + ' görevi'});
+  });
+  return out;
+}
+
+let clSel = null;          // açık müşteri
+let clKindSel = 'temas';   // kayıt formunun türü
+let clAdOpen = false;
+
+function buildClientsView(wi) {
+  const act = clActive(), arch = clAll().filter(c => c.status === 'arsiv');
+  if (clSel && !clGet(clSel)) clSel = null;
+  const late = act.filter(c => clHealth(c).cls !== 'ok').length;
+  const rep = act.filter(c => !clReportDone(c)).length;
+  const mn = MONTHS_TR[new Date().getMonth()];
+  const row = c => {
+    const h = clHealth(c);
+    return `<button class="cl-row ${h.cls} ${clSel === c.id ? 'sel' : ''}" onclick="clOpen('${esc(c.id)}')">
+      <span class="cl-stripe"></span>
+      <span style="min-width:0"><div class="cl-nm">${esc(c.name)}</div><div class="cl-sub">${esc(c.currentStatus || c.sector || 'Güncel durum notu yok')}</div></span>
+      <span class="cl-days">${esc(h.label)}</span></button>`;
+  };
+  const list = clAll().length
+    ? clSorted(act).map(row).join('') + (arch.length ? `<div class="cl-arch">Arşiv</div>` + arch.map(row).join('') : '')
+    : '<div class="cl-empty">Henüz müşteri yok. Aşağıdan ilk müşterini ekle.</div>';
+  return `<div class="cl-wrap">
+    <div class="sub-intro"><b>Müşteriler</b> — Hiçbir müşteri sessiz kalmasın: liste en acilden en rahata sıralı. Her temas ve rapor kaydı bu haftaya <b>+${nf(TEMAS_PTS)} puan</b> ekler (müşteri başına günde 1).
+      <span class="sub-hint">Temas zamanı gelenler Günlük Plan'da bugünün kartına küçük iş olarak düşer. Kayıtlara hasta adı / kişisel veri yazma.</span></div>
+    <div class="cl-stats">
+      <div class="cl-stat"><b>${act.length}</b>aktif müşteri</div>
+      <div class="cl-stat ${late ? 'red' : ''}"><b>${late}</b>temas zamanı gelen</div>
+      <div class="cl-stat ${rep ? 'orange' : ''}"><b>${rep}</b>${mn} raporu bekleyen</div>
+      <div class="cl-stat"><b>${nf(temasBonus(wi))}</b>bu hafta temas puanı</div>
+    </div>
+    <div class="cl-grid ${clSel ? 'open' : ''}">
+      <div class="cl-listcol"><div class="cl-panel">${list}
+        <div class="cl-add">
+          <input class="cl-in" id="cl-new-name" placeholder="Yeni müşteri adı" onkeydown="if(event.key==='Enter')clAddClient()">
+          <input class="cl-in" id="cl-new-sector" placeholder="Sektör" onkeydown="if(event.key==='Enter')clAddClient()">
+          <button class="cl-btn" onclick="clAddClient()">Müşteri ekle</button>
+        </div></div></div>
+      <div class="cl-detcol">${clSel ? buildClientDetail(clGet(clSel), wi) : '<div class="cl-panel cl-ph">Soldan bir müşteri seç. Penceresinde güncel durum, reklamlar, kayıt geçmişi ve mesaj taslağı açılır.</div>'}</div>
+    </div>
+  </div>`;
+}
+
+function buildClientDetail(c, wi) {
+  const h = clHealth(c), last = clLast(c), r = Number(c.rhythmDays) || 4;
+  const id = esc(c.id), mn = MONTHS_TR[new Date().getMonth()];
+  const todo = clPendingTasks(c, wi);
+  const order = {kazanan:0, test:1, durdu:2};
+  const ads = [...(c.ads || [])].sort((a, b) => (order[a.state] ?? 1) - (order[b.state] ?? 1) || String(b.startedAt).localeCompare(String(a.startedAt)));
+  const notes = [...(c.notes || [])].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt).slice(0, 60);
+  return `<div class="cl-det">
+    <div class="cl-sec">
+      <div class="cl-sec-h"><div class="cl-title"><button class="cl-btn sm cl-back" onclick="clClose()">← Liste</button><h2>${esc(c.name)}</h2>${c.sector ? `<span class="cl-pill">${esc(c.sector)}</span>` : ''}</div>
+        <span class="cl-pill ${h.cls}">${h.cls === 'ok' ? 'Ritim yolunda' : h.cls === 'warn' ? 'Temas zamanı' : 'Sessiz kaldı'}</span></div>
+      <div class="cl-meta"><span>Son temas <b>${last ? clFmt(last.date) + (last.channel ? ' · ' + esc(last.channel) : '') : 'kayıt yok'}</b></span>
+        <span>${mn} raporu <b>${clReportDone(c) ? 'gönderildi' : 'bekliyor'}</b></span>
+        <span>Ritim <select class="cl-sel" onchange="clSet('${id}','rhythmDays',Number(this.value),'Ritim güncellendi')">${[3, 4, 7].map(n => `<option value="${n}" ${n === r ? 'selected' : ''}>${n} günde bir</option>`).join('')}</select></span></div>
+      <div class="cl-actions"><button class="cl-btn pri" onclick="clFocusNote('temas')">Bugün temas ettim</button>
+        <button class="cl-btn" onclick="clFocusNote('rapor')">Rapor gönderildi</button>
+        <button class="cl-btn ghost" onclick="clSet('${id}','status','${c.status === 'arsiv' ? 'aktif' : 'arsiv'}','${c.status === 'arsiv' ? 'Arşivden çıkarıldı' : 'Arşivlendi'}')">${c.status === 'arsiv' ? 'Arşivden çıkar' : 'Arşivle'}</button></div>
+    </div>
+
+    ${todo.length ? `<div class="cl-sec"><div class="cl-sec-h"><h3>Bekleyen işler</h3><span class="cl-hint">"${esc(c.name)} | …" görevlerin</span></div>
+      <div class="cl-todo">${todo.map(t => `<div>${esc(t.text)}<small>${esc(t.src)}</small></div>`).join('')}</div></div>` : ''}
+
+    <div class="cl-sec">
+      <div class="cl-sec-h"><h3>Güncel durum</h3><button class="cl-btn sm" onclick="clSaveStatus('${id}')">Kaydet</button></div>
+      <textarea class="cl-ta" id="cl-status" placeholder="Bu müşteride şu an ne oluyor? Örn: Yeni satış kampanyası test aşamasında, mesaj başı maliyet düşüyor.">${esc(c.currentStatus)}</textarea>
+      ${c.statusUpdated ? `<span class="cl-hint">Son düzenleme: ${clFmt(c.statusUpdated)}</span>` : ''}
+    </div>
+
+    <div class="cl-sec">
+      <div class="cl-sec-h"><h3>Reklamlar</h3><button class="cl-btn sm" onclick="clAdOpen=!clAdOpen;rerenderView()">${clAdOpen ? 'Vazgeç' : 'Reklam ekle'}</button></div>
+      ${clAdOpen ? `<div class="cl-form">
+        <label>Reklam adı<input class="cl-in" id="cl-ad-name" placeholder="Ör. Kasım randevu kampanyası"></label>
+        <label>Başlangıç<input class="cl-in" type="date" id="cl-ad-start" value="${clToday()}"></label>
+        <label class="full">Neden kurduk<textarea class="cl-ta" id="cl-ad-why" placeholder="Hangi ihtiyaç için kuruldu?"></textarea></label>
+        <label class="full">Ne bekliyoruz<textarea class="cl-ta" id="cl-ad-exp" placeholder="Hedef: ör. haftada 20 mesaj, mesaj başı 250 TL altı"></textarea></label>
+        <label>Durum<select class="cl-sel" id="cl-ad-state">${Object.entries(CL_STATE).map(([k, v]) => `<option value="${k}" ${k === 'test' ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+        <div style="display:flex;align-items:flex-end;justify-content:flex-end"><button class="cl-btn pri" onclick="clAddAd('${id}')">Reklamı kaydet</button></div>
+      </div>` : ''}
+      <div class="cl-ads">${ads.length ? ads.map(a => `<div class="cl-ad ${a.state === 'kazanan' ? 'win' : ''}">
+          <div class="cl-ad-t"><b>${esc(a.name)}</b><select class="cl-sel" onchange="clAdSet('${id}','${a.id}','state',this.value)">${Object.entries(CL_STATE).map(([k, v]) => `<option value="${k}" ${a.state === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+          <div class="cl-hint">Başlangıç ${clFmt(a.startedAt)}</div>
+          <div class="cl-kv"><span>Neden kurduk</span>${esc(a.why) || '—'}</div>
+          <div class="cl-kv"><span>Beklenti</span>${esc(a.expectation) || '—'}</div>
+          <div class="cl-kv"><span>Sonuç notu</span></div>
+          <textarea class="cl-ta" placeholder="Ne oldu? Maliyet, mesaj sayısı, karar…" onchange="clAdSet('${id}','${a.id}','result',this.value.trim())">${esc(a.result)}</textarea>
+        </div>`).join('') : '<div class="cl-hint">Kayıtlı reklam yok. "Reklam ekle" ile neden kurduğunu ve ne beklediğini yaz; sonuçları zamanla buraya not edersin.</div>'}</div>
+    </div>
+
+    <div class="cl-sec">
+      <div class="cl-sec-h"><h3>Kayıt geçmişi</h3>
+        <div class="cl-seg">${Object.entries(CL_KIND).map(([k, v]) => `<button class="${clKindSel === k ? 'on' : ''}" onclick="clKind('${k}')">${v}</button>`).join('')}</div></div>
+      <div class="cl-form" id="cl-note-form">
+        ${clKindSel !== 'not' ? `<label>Kanal<select class="cl-sel" id="cl-note-chan">${CL_CHANNELS.map(ch => `<option>${ch}</option>`).join('')}</select></label>` : ''}
+        <label>Tarih<input class="cl-in" type="date" id="cl-note-date" value="${clToday()}"></label>
+        <label class="full">Açıklama<textarea class="cl-ta" id="cl-note-text" placeholder="Ne konuşuldu, ne gönderildi, ne karar verildi?"></textarea></label>
+        <div class="full" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="cl-hint">${clKindSel === 'not' ? 'Not son temas tarihini değiştirmez.' : `Kaydedince son temas güncellenir · +${nf(TEMAS_PTS)} puan`}</span>
+          <button class="cl-btn pri" onclick="clAddNote('${id}')">${clKindSel === 'temas' ? 'Temas kaydet' : clKindSel === 'rapor' ? 'Rapor gönderildi' : 'Not kaydet'}</button></div>
+      </div>
+      <div>${notes.length ? notes.map(n => `<div class="cl-ev"><div class="d">${clFmt(n.date)}</div>
+          <div class="x"><span class="cl-pill ${n.kind === 'temas' ? 'acc' : n.kind === 'rapor' ? 'ok' : ''}">${CL_KIND[n.kind] || 'Not'}${n.channel ? ' · ' + esc(n.channel) : ''}</span>${esc(n.text)}</div>
+          <button class="btn-icon danger" title="Kaydı sil" onclick="clDelNote('${id}','${n.id}')">×</button></div>`).join('')
+        : '<div class="cl-hint">Henüz kayıt yok. Her konuşmayı Temas, gönderdiğin raporu Rapor olarak kaydet; son temas tarihi otomatik güncellenir.</div>'}</div>
+    </div>
+
+    <div class="cl-sec">
+      <div class="cl-sec-h"><h3>Haftalık mesaj taslağı</h3><button class="cl-btn sm" onclick="clCopyDraft()">Kopyala</button></div>
+      <textarea class="cl-ta" id="cl-draft" style="min-height:170px">${esc(clDraft(c))}</textarea>
+      <span class="cl-hint">Güncel durum ve aktif reklamlardan hazırlanır. Düzenleyip WhatsApp'tan gönder, sonra Temas olarak kaydet.</span>
+    </div>
+  </div>`;
+}
+
+function clDraft(c) {
+  const live = (c.ads || []).filter(a => a.state !== 'durdu');
+  const lines = [`Merhaba, ${c.name} için haftalık kısa bilgi:`, ''];
+  if (c.currentStatus) lines.push('• Güncel durum: ' + c.currentStatus);
+  if (live.length) {
+    lines.push('• Aktif reklamlar:');
+    live.forEach(a => lines.push('   - ' + a.name + (a.state === 'kazanan' ? ' (en iyi performans)' : ' (test ediliyor)') + (a.result ? ': ' + a.result : '')));
+  }
+  lines.push('• Bu hafta yaptığım: ', '• Gelecek hafta planım: ', '', 'Sorunuz olursa yazabilirsiniz.');
+  return lines.join('\n');
+}
+
+function clOpen(id) {
+  clSel = id; clAdOpen = false;
+  if (weekView !== 'clients') setWeekView('clients'); else rerenderView();
+  if (window.innerWidth <= 760) document.querySelector('.cl-grid')?.scrollIntoView({block:'start'});
+}
+function clClose() { clSel = null; rerenderView(); }
+function clKind(k) {
+  const txt = document.getElementById('cl-note-text')?.value || '';
+  clKindSel = k; rerenderView();
+  const t = document.getElementById('cl-note-text'); if (t) t.value = txt;
+}
+function clFocusNote(k) {
+  clKind(k);
+  const t = document.getElementById('cl-note-text');
+  if (t) { t.scrollIntoView({block:'center'}); t.focus(); }
+}
+function clSet(id, field, val, msg) {
+  const c = clGet(id); if (!c) return;
+  c[field] = val; saveClients(); rerenderView();
+  if (msg) toast('✅ ' + msg);
+}
+function clSaveStatus(id) {
+  const c = clGet(id), v = document.getElementById('cl-status').value.trim();
+  if (v === (c.currentStatus || '')) { toast('Değişiklik yok'); return; }
+  c.currentStatus = v; c.statusUpdated = clToday();
+  saveClients(); rerenderView(); toast('✅ Güncel durum kaydedildi');
+}
+function clAddClient() {
+  const n = document.getElementById('cl-new-name'), s = document.getElementById('cl-new-sector');
+  const name = n.value.trim();
+  if (!name) { n.focus(); return; }
+  const base = clNorm(name).replace(/ /g, '-') || 'musteri';
+  const id = base + '-' + Date.now().toString(36);
+  clientsData.clients[id] = {id, name, sector:s.value.trim(), status:'aktif', rhythmDays:4, currentStatus:'', statusUpdated:'', createdAt:Date.now(), ads:[], notes:[]};
+  clSel = id;
+  saveClients(); rerenderView(); toast('✅ ' + name + ' eklendi');
+}
+function clAddAd(id) {
+  const name = document.getElementById('cl-ad-name').value.trim();
+  if (!name) { document.getElementById('cl-ad-name').focus(); return; }
+  clGet(id).ads.push({id:newId(), name, startedAt:document.getElementById('cl-ad-start').value || clToday(),
+    why:document.getElementById('cl-ad-why').value.trim(), expectation:document.getElementById('cl-ad-exp').value.trim(),
+    state:document.getElementById('cl-ad-state').value, result:'', createdAt:Date.now()});
+  clAdOpen = false;
+  saveClients(); rerenderView(); toast('✅ Reklam eklendi');
+}
+function clAdSet(id, adId, field, val) {
+  const a = (clGet(id)?.ads || []).find(x => x.id === adId); if (!a || a[field] === val) return;
+  a[field] = val; saveClients();
+  if (field === 'state') { rerenderView(); toast('Durum: ' + CL_STATE[val]); } else toast('✅ Sonuç notu kaydedildi');
+}
+function clRecord(id, kind, date, channel, text) {
+  const c = clGet(id); if (!c) return;
+  const wi = WEEKS.findIndex(w => date >= isoDay(w.mon) && date <= isoDay(addDays(w.mon, 6)));
+  const before = wi >= 0 ? temasCount(wi) : 0;
+  c.notes.push({id:newId(), kind, date, channel:kind === 'not' ? '' : channel, text, createdAt:Date.now()});
+  saveClients();
+  const gained = wi >= 0 && temasCount(wi) > before;
+  updateHeroStats(); updateWeekBtns();
+  return gained;
+}
+function clAddNote(id) {
+  const text = document.getElementById('cl-note-text').value.trim(), k = clKindSel;
+  if (!text && k === 'not') { toast('⚠️ Not boş olamaz'); return; }
+  const gained = clRecord(id, k, document.getElementById('cl-note-date').value || clToday(), document.getElementById('cl-note-chan')?.value || '', text);
+  rerenderView();
+  toast(`✅ ${CL_KIND[k]} kaydedildi${gained ? ` · +${nf(TEMAS_PTS)} puan` : ''}`);
+}
+function clDelNote(id, nid) {
+  if (!confirm('Bu kayıt silinsin mi?')) return;
+  const c = clGet(id); c.notes = c.notes.filter(n => n.id !== nid);
+  saveClients(); updateHeroStats(); updateWeekBtns(); rerenderView(); toast('Kayıt silindi');
+}
+function clCopyDraft() {
+  const t = document.getElementById('cl-draft');
+  navigator.clipboard.writeText(t.value).then(() => toast('✅ Taslak kopyalandı'), () => { t.select(); toast('Metni seçtim, kopyalayabilirsin'); });
+}
+
+/* Günlük Plan → bugünün kartında müşteri küçük işleri (günün büyük işinin önüne geçmez) */
+function clJobsToday(wi) {
+  const today = clToday(), jobs = [];
+  const first = monthRole(wi).first;
+  for (const c of clSorted(clActive())) {
+    const h = clHealth(c), last = clLast(c);
+    const doneToday = last && last.date === today;
+    if (h.cls !== 'ok') jobs.push({c, kind:'temas', text:`${c.name} — haftalık bilgi gönder`, color:h.cls === 'crit' ? 'var(--red)' : 'var(--orange)', done:false});
+    else if (doneToday && last.kind === 'temas') jobs.push({c, kind:'temas', text:`${c.name} — haftalık bilgi gönder`, color:'var(--green)', done:true});
+    if (first) {
+      const rep = clReportDone(c);
+      const repToday = (c.notes || []).some(n => n.kind === 'rapor' && n.date === today);
+      if (!rep || repToday) jobs.push({c, kind:'rapor', text:`${c.name} — ${MONTHS_TR[new Date().getMonth()]} raporu gönder`, color:'var(--accent)', done:rep});
+    }
+  }
+  return jobs;
+}
+function buildSmallJobs(wi) {
+  const jobs = clJobsToday(wi);
+  if (!jobs.length) return '';
+  const open = jobs.filter(j => !j.done).length;
+  return `<div class="dp-small">
+    <div class="dp-small-h">Küçük işler · müşteri teması <span>${open ? `${open} bekliyor · her biri +${nf(TEMAS_PTS)}p` : 'hepsi tamam ✓'}</span></div>
+    ${jobs.map(j => `<div class="dp-job ${j.done ? 'done' : ''}"><span class="jd" style="background:${j.color}"></span>
+      <span class="jt" title="Müşteri penceresini aç" onclick="clOpen('${esc(j.c.id)}')">${esc(j.text)}</span>
+      ${j.done ? '<span class="cl-hint">✓</span>' : `<button onclick="clQuick('${esc(j.c.id)}','${j.kind}')">${j.kind === 'rapor' ? '✓ Gönderildi' : '✓ Temas'}</button>`}</div>`).join('')}
+  </div>`;
+}
+function clQuick(id, kind) {
+  const gained = clRecord(id, kind, clToday(), 'WhatsApp', kind === 'rapor' ? 'Aylık rapor gönderildi' : 'Haftalık bilgi gönderildi');
+  rerenderView();
+  toast(`✅ ${clGet(id).name}: ${kind === 'rapor' ? 'rapor' : 'temas'} kaydedildi${gained ? ` · +${nf(TEMAS_PTS)} puan` : ''}`);
+}
+
 
 (function() {
   const _stored_wc = localStorage.getItem('wc26');
@@ -662,12 +1100,13 @@ function catTotal(wi,ci) {
 }
 function weekTotal(wi) {
   const cats=getCats(wi);
-  return +cats.reduce((s,_,ci)=>s+catTotal(wi,ci),0).toFixed(2);
+  // Görev puanları + müşteri temas puanı (temas/rapor kaydı başına 0,5)
+  return +(cats.reduce((s,_,ci)=>s+catTotal(wi,ci),0) + temasBonus(wi)).toFixed(2);
 }
 function weekTarget(wi) { return getCats(wi).reduce((s,c)=>s+c.target,0); }
 // weekPlan[wi].manual = { grade: 0-10 | null, note: '' } — ani değişiklik olan haftada not + elle puan
 function manualOf(wi) { const m = weekPlan[wi]?.manual; return m && typeof m.grade === 'number' ? m : null; }
-function autoPct(wi) { const t=weekTarget(wi); return t?Math.round(weekTotal(wi)/t*100):0; }
+function autoPct(wi) { const t=weekTarget(wi); return t?Math.min(100,Math.round(weekTotal(wi)/t*100)):0; }
 function weekPct(wi) { const m=manualOf(wi); return m ? Math.round(m.grade*10) : autoPct(wi); }
 function hasData(wi) { return weekTotal(wi)>0 || !!manualOf(wi); }
 
@@ -710,6 +1149,7 @@ function buildWeekPage(wi) {
   if (weekView === 'month' && !role.first && !role.last) weekView = 'tasks';
   let body;
   if (weekView === 'mtasks') body = buildMonthTasksView(wi);
+  else if (weekView === 'clients') body = buildClientsView(wi);
   else if (weekView === 'days') body = buildDaysView(wi);
   else if (weekView === 'month') body = buildMonthView(wi);
   else body = buildTasksView(wi);
@@ -811,7 +1251,7 @@ function buildTasksView(wi) {
       <div class="score-card accent">
         <div class="sc-label">Toplam Puan</div>
         <div class="sc-val" id="wtotal-${wi}">${Number.isInteger(total)?total:total.toFixed(1)}</div>
-        <div class="sc-sub">/ ${tgt} puan</div>
+        <div class="sc-sub">/ ${tgt} puan${temasBonus(wi)?` <span class="temas-bonus" title="Müşteri temas/rapor kayıtlarından">· +${nf(temasBonus(wi))} temas</span>`:''}</div>
       </div>
       <div class="score-card" style="border-color:var(--accent);background:rgba(124,131,253,.06)">
         <div class="sc-label">10 Üzerinden Not${man?' · <span class="man-tag">✍️ elle</span>':''}</div>
@@ -1283,13 +1723,14 @@ function toast(msg){
 ══════════════════════════════════════════════════════════ */
 function exportData() {
   const payload = {
-    version: 3,
+    version: 4,
     exportedAt: new Date().toISOString(),
     weekCats: weekCats,
     weekData: weekData,
     weekPlan: weekPlan,
     monthNotes: monthNotes,
-    monthTasks: monthTasks
+    monthTasks: monthTasks,
+    clients: clientsData
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1351,6 +1792,7 @@ function importData() {
     if(payload.weekPlan) weekPlan = payload.weekPlan;
     if(payload.monthNotes) monthNotes = payload.monthNotes;
     if(payload.monthTasks) monthTasks = payload.monthTasks;
+    if(payload.clients && payload.clients.clients) { clientsData = payload.clients; saveClients(); }
     save(); savePlan(); saveMonth(); saveMonthTasks();
     document.getElementById('import-modal').remove();
     toast('✅ Veriler basariyla yuklendi!');
@@ -1377,7 +1819,7 @@ function resetAllData() {
 /* ══════════════════════════════════════════════════════════
    HAFTA ALT SAYFALARI — Görevler & Odak · Aylık Görevler · Günlük Plan · Ay Notları
 ══════════════════════════════════════════════════════════ */
-let weekView = 'tasks';   // tasks | mtasks | days | month
+let weekView = 'tasks';   // tasks | mtasks | days | clients | month
 
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1441,8 +1883,13 @@ function buildSubNav(wi) {
   else if (r.first)      monthBtn = btn('month', `🌱 ${mn} Hedefleri`, 'month');
   else if (r.last)       monthBtn = btn('month', `🔍 ${mn} Değerlendirmesi`, 'month');
   return `<div class="week-subnav">
-    ${btn('tasks', '📋 Görevler & Odak')}${btn('mtasks', `🗓 ${mn} Görevleri`)}${btn('days', '📅 Günlük Plan')}${monthBtn}
+    ${btn('tasks', '📋 Görevler & Odak')}${btn('mtasks', `🗓 ${mn} Görevleri`)}${btn('days', '📅 Günlük Plan')}${btn('clients', `👥 Müşteriler${clLateBadge()}`)}${monthBtn}
   </div>`;
+}
+
+function clLateBadge() {
+  const n = clActive().filter(c => clHealth(c).cls !== 'ok').length;
+  return n ? ` <span style="color:var(--red)">· ${n}</span>` : '';
 }
 
 /* ── ODAK: Bu haftanın 3 taşı (Covey "büyük taşlar" + Keller "tek şey") ── */
@@ -1684,6 +2131,7 @@ function buildDaysView(wi) {
       ${list.length && !day.frog ? '<div class="dp-frog-hint">🐸 Günün kurbağasını seç: en zor / en çok ertelediğin iş, sabah ilk o.</div>' : ''}
       <div class="dp-items">${rows || '<div class="dp-empty">Henüz plan yok</div>'}</div>
       ${day.items.length > DAY_MAX ? `<div class="dp-over">${day.items.length} madde — en önemli ${DAY_MAX} yeter, gerisini başka güne taşı.</div>` : ''}
+      ${isToday ? buildSmallJobs(wi) : ''}
       <div class="dp-add">
         <input type="time" class="dp-time" id="dpat-${di}" title="Saat (isteğe bağlı)">
         <input class="dp-text" id="dpa-${di}" placeholder="+ Plan ekle, Enter'a bas" onkeydown="if(event.key==='Enter')dpAdd(${wi},${di})">
