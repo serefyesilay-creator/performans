@@ -1158,6 +1158,7 @@ function buildClientDetail(c, wi) {
         <span>${mn} raporu <b>${clReportDone(c) ? 'gönderildi' : 'bekliyor'}</b></span>
         <span>Hitap <input class="cl-in cl-mini" value="${esc(c.hitap || '')}" placeholder="ör. Nuran Hanım" onchange="clSet('${id}','hitap',this.value.trim(),'Hitap kaydedildi')"></span>
         <span>Meta hesabı <input class="cl-in cl-mini" value="${esc(c.metaAccount || '')}" placeholder="reklam hesabı adı" onchange="clSet('${id}','metaAccount',this.value.trim(),'Meta hesabı kaydedildi')"></span>
+        <span>Diğer adlar <input class="cl-in cl-mini" value="${esc(c.aliases || '')}" placeholder="ör. Emre hoca" title="Görevlerde müşteri bu adlarla da geçiyorsa virgülle yaz; ajan bunları da tarar" onchange="clSet('${id}','aliases',this.value.trim(),'Diğer adlar kaydedildi')"></span>
         <span>Ajan <select class="cl-sel" onchange="clSet('${id}','mode',this.value,'Ajan modu kaydedildi')">${[['rapor','Müşteriye rapor taslağı'],['takip','Bana takip notu']].map(([k,v]) => `<option value="${k}" ${(c.mode || 'rapor') === k ? 'selected' : ''}>${v}</option>`).join('')}</select></span>
         <span>Aylık rapor <select class="cl-sel" onchange="clSet('${id}','reportFormat',this.value,'Rapor formatı kaydedildi')">${[['mesaj','Mesaj'],['pdf','PDF + kısa mesaj'],['ikisi','İkisi de']].map(([k,v]) => `<option value="${k}" ${(c.reportFormat || 'mesaj') === k ? 'selected' : ''}>${v}</option>`).join('')}</select></span>
         <span>Ritim <select class="cl-sel" onchange="clSet('${id}','rhythmDays',Number(this.value),'Ritim güncellendi')">${[3, 4, 7].map(n => `<option value="${n}" ${n === r ? 'selected' : ''}>${n} günde bir</option>`).join('')}</select></span></div>
@@ -1838,21 +1839,25 @@ function ajanOzet() {
 }
 // Müşterinin adının geçtiği görevler, aylık görevler, günlük plan maddeleri ve gün notları (bu + geçen hafta)
 function clMentions(c) {
-  const key = clNorm(c.name); if (!key) return [];
-  const hit = t => clNorm(t).includes(key);
-  const out = [], now = WEEKS.findIndex(w => { const t = clParse(clToday()); return t >= w.mon && t < addDays(w.mon, 7); });
-  for (const wi of [now, now - 1].filter(x => x >= 0 && WEEKS[x])) {
+  const keys = [c.name, ...String(c.aliases || '').split(',')].map(clNorm).filter(k => k.length >= 3);
+  if (!keys.length) return [];
+  const hit = t => { const n = clNorm(t); return keys.some(k => n.includes(k)); };
+  const seen = new Map();   // aynı metin haftadan haftaya kopyalanmışsa en yenisi kalır
+  const add = (o) => { const k = clNorm(o.metin); if (!seen.has(k)) seen.set(k, o); };
+  const now = WEEKS.findIndex(w => { const t = clParse(clToday()); return t >= w.mon && t < addDays(w.mon, 7); });
+  (monthTasks[clMonthKey()] || []).forEach(t => { if (hit(t.text)) add({kaynak: 'Aylık görev', metin: t.text, durum: t.done ? 'yapıldı' : 'açık'}); });
+  for (let wi = now; wi >= 0 && wi > now - 6; wi--) {
+    if (!WEEKS[wi]) continue;
     const wl = WEEKS[wi].label;
-    weekTasks(wi).forEach(t => { if (hit(t.name)) out.push({kaynak: `${wl} görevi`, metin: t.name, durum: t.done ? 'yapıldı' : 'açık'}); });
     const plan = weekPlan[wi];
     (plan?.days || []).forEach((d, di) => {
       const date = isoDay(addDays(WEEKS[wi].mon, di));
-      (d?.items || []).forEach(it => { if (hit(it.text)) out.push({kaynak: 'Günlük plan', tarih: date, metin: it.text, durum: it.done ? 'yapıldı' : 'açık'}); });
-      if (d?.note && hit(d.note)) out.push({kaynak: 'Gün notu', tarih: date, metin: d.note});
+      (d?.items || []).forEach(it => { if (hit(it.text)) add({kaynak: 'Günlük plan', tarih: date, metin: it.text, durum: it.done ? 'yapıldı' : 'açık'}); });
+      if (d?.note && hit(d.note)) add({kaynak: 'Gün notu', tarih: date, metin: d.note});
     });
+    if (weekCats[wi]) weekTasks(wi).forEach(t => { if (hit(t.name)) add({kaynak: `${wl} görevi (${WEEKS[wi].shortLabel})`, metin: t.name, durum: t.done ? 'yapıldı' : 'açık'}); });
   }
-  (monthTasks[clMonthKey()] || []).forEach(t => { if (hit(t.text)) out.push({kaynak: 'Aylık görev', metin: t.text, durum: t.done ? 'yapıldı' : 'açık'}); });
-  return out.slice(0, 25);
+  return [...seen.values()].slice(0, 25);
 }
 function ajanImport(raw) {
   let obj;
