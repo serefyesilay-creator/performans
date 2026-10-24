@@ -756,6 +756,8 @@ button,input,select,textarea{font-family:var(--font);}
 #ajan-json{width:100%;min-height:220px;border:1px solid var(--border);border-radius:12px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;}
 #ajan-kaydet{margin-top:10px;background:var(--accent);color:#fff;border:0;border-radius:980px;padding:11px 22px;font-size:15px;cursor:pointer;}
 #ajan-sonuc{margin-top:10px;font-weight:600;}#ajan-sonuc.ok{color:var(--green);}#ajan-sonuc.err{color:var(--red);}
+.cl-btn.ghost.cl-del{color:var(--red);margin-left:auto;}
+.cl-btn.ghost.cl-del:hover{background:rgba(215,0,21,.08);}
 </style>
 </head>
 <body>
@@ -1158,7 +1160,8 @@ function buildClientDetail(c, wi) {
         <span>Ritim <select class="cl-sel" onchange="clSet('${id}','rhythmDays',Number(this.value),'Ritim güncellendi')">${[3, 4, 7].map(n => `<option value="${n}" ${n === r ? 'selected' : ''}>${n} günde bir</option>`).join('')}</select></span></div>
       <div class="cl-actions"><button class="cl-btn pri" onclick="clFocusNote('temas')">Bugün temas ettim</button>
         <button class="cl-btn" onclick="clFocusNote('rapor')">Rapor gönderildi</button>
-        <button class="cl-btn ghost" onclick="clSet('${id}','status','${c.status === 'arsiv' ? 'aktif' : 'arsiv'}','${c.status === 'arsiv' ? 'Arşivden çıkarıldı' : 'Arşivlendi'}')">${c.status === 'arsiv' ? 'Arşivden çıkar' : 'Arşivle'}</button></div>
+        <button class="cl-btn ghost" onclick="clSet('${id}','status','${c.status === 'arsiv' ? 'aktif' : 'arsiv'}','${c.status === 'arsiv' ? 'Arşivden çıkarıldı' : 'Arşivlendi'}')">${c.status === 'arsiv' ? 'Arşivden çıkar' : 'Arşivle'}</button>
+        <button class="cl-btn ghost cl-del" onclick="clDelete('${id}')">Müşteriyi sil</button></div>
     </div>
 
     ${buildAgentDrafts(c)}
@@ -1253,6 +1256,22 @@ function clSaveStatus(id) {
   if (v === (c.currentStatus || '')) { toast('Değişiklik yok'); return; }
   c.currentStatus = v; c.statusUpdated = clToday();
   saveClients(); rerenderView(); toast('✅ Güncel durum kaydedildi');
+}
+function clDelete(id) {
+  const c = clGet(id); if (!c) return;
+  const pts = (c.notes || []).filter(n => n.kind !== 'not').length;
+  const msg = `"${c.name}" kalıcı olarak silinsin mi?\n\n`
+    + `Silinecek: ${(c.ads || []).length} reklam (tablolarıyla), ${(c.notes || []).length} kayıt, bekleyen ajan taslakları.`
+    + (pts ? `\nBu müşterinin temas/rapor kayıtlarından gelen puanlar da ilgili haftalardan düşer.` : '')
+    + `\n\nSadece listeden kaldırmak istiyorsan İptal'e bas ve "Arşivle"yi kullan.`;
+  if (!confirm(msg)) return;
+  delete clientsData.clients[id];
+  let dr = 0;
+  for (const k of Object.keys(reportDrafts.drafts || {})) if (reportDrafts.drafts[k].client === id) { delete reportDrafts.drafts[k]; dr++; }
+  if (dr) saveDrafts();
+  if (clSel === id) clSel = null;
+  saveClients(); updateHeroStats(); updateWeekBtns(); rerenderView();
+  toast('🗑 ' + c.name + ' silindi');
 }
 function clAddClient() {
   const n = document.getElementById('cl-new-name'), s = document.getElementById('cl-new-sector');
