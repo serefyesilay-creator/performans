@@ -406,6 +406,82 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .cl-todo small{color:var(--muted);font-family:'DM Mono',monospace;font-size:10.5px;margin-left:6px;}
 .cl-ph{padding:36px 20px;text-align:center;color:var(--muted);font-size:13px;}
 .cl-hint{font-size:11.5px;color:var(--muted);}
+/* Reklam penceresi (tablo + zaman çizelgesi + arşiv) */
+.adm-overlay{position:fixed;inset:0;z-index:3000;background:rgba(6,6,12,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:4vh 14px;overflow:hidden;}
+.adm-box{width:100%;max-width:1000px;max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.6);padding:0 0 18px;}
+.adm-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 18px 12px;background:var(--card);border-bottom:1px solid var(--border);}
+.adm-head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.adm-crumb{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:2px;}
+.adm-title{display:block;width:100%;background:transparent;border:0;border-bottom:1px dashed transparent;color:var(--white);font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;padding:2px 0;outline:none;}
+input.adm-title:hover,input.adm-title:focus{border-bottom-color:var(--border);}
+.adm-x{background:var(--surface);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;font-size:18px;line-height:1;cursor:pointer;}
+.adm-x:hover{color:var(--white);border-color:var(--accent);}
+.adm-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:14px 18px 4px;}
+@media(max-width:640px){.adm-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}}
+.adm-kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;min-width:0;}
+.adm-kpi span{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.04em;}
+.adm-kpi b{display:block;font-family:'DM Mono',monospace;font-size:18px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adm-kpi em{display:block;font-style:normal;font-size:10.5px;color:var(--muted);}
+.adm-kpi.hi{border-color:rgba(250,179,135,.45);}.adm-kpi.hi b{color:var(--orange);}
+.adm-sec{margin:12px 18px 0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0;}
+.adm-sec h3,.adm-h3{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+.adm-grid2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:0 0;}
+.adm-grid2 .adm-sec:first-child{margin-right:6px;}.adm-grid2 .adm-sec:last-child{margin-left:6px;}
+@media(max-width:700px){.adm-grid2{grid-template-columns:minmax(0,1fr);}.adm-grid2 .adm-sec{margin-left:18px!important;margin-right:18px!important;}}
+.adm-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.adm-unit{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);}
+.adm-unit select{width:auto;padding:4px 6px;font-size:12px;}
+.adm-tw{overflow-x:auto;border:1px solid var(--border);border-radius:8px;}
+.adm-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px;}
+.adm-table th{position:sticky;top:0;background:#20202e;color:var(--muted);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;}
+.adm-table td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:0;height:34px;vertical-align:middle;}
+.adm-table th:last-child,.adm-table td:last-child{border-right:0;}
+.adm-table tbody tr:nth-child(even) td{background:rgba(255,255,255,.015);}
+.adm-table tbody tr:hover td{background:rgba(124,131,253,.06);}
+.adm-table input{width:100%;height:33px;background:transparent;border:0;outline:none;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:13px;padding:0 8px;}
+.adm-table input.num{font-family:'DM Mono',monospace;text-align:right;}
+.adm-table input:focus{background:rgba(124,131,253,.12);box-shadow:inset 0 0 0 2px var(--accent);}
+.adm-table input[type=date]{color-scheme:dark;font-family:'DM Mono',monospace;font-size:12px;}
+.adm-table td.calc{font-family:'DM Mono',monospace;text-align:right;padding:0 8px;color:var(--text);white-space:nowrap;}
+.adm-table td.calc.hi{color:var(--orange);font-weight:600;}
+.adm-table td .btn-icon{width:100%;height:33px;}
+.adm-table tfoot td{background:#20202e;font-weight:700;color:var(--white);padding:0 8px;font-size:12px;}
+.adm-table.ro td{padding:8px;height:auto;}
+.adm-table.ro td.wrap{white-space:normal;color:var(--text);font-size:12.5px;line-height:1.45;}
+.adm-table tr.click{cursor:pointer;}
+.adm-empty{padding:16px 10px!important;color:var(--muted);font-size:12.5px;white-space:normal;}
+.adm-chart{width:100%;height:150px;display:block;}
+.adm-chart text{fill:var(--muted);font-size:10px;font-family:'DM Mono',monospace;}
+.adm-legend{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.adm-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:6px;}
+.adm-lbl{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);font-weight:600;}
+.adm-lbl .cl-ta{min-height:54px;}
+.adm-tl{display:flex;flex-direction:column;border-left:2px solid var(--border);margin-left:5px;padding-left:12px;gap:9px;}
+.adm-ev{position:relative;display:flex;flex-direction:column;gap:1px;font-size:12.5px;}
+.adm-ev::before{content:'';position:absolute;left:-18px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--accent);}
+.adm-ev.now::before{background:var(--orange);border-color:var(--orange);}
+.adm-ev .d{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--muted);}
+.adm-ev .x{color:var(--text);overflow-wrap:anywhere;}
+.adm-state{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+.adm-state select{width:auto;}
+.adm-foot{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;margin-top:auto;padding-top:6px;}
+.adm-closed{margin:12px 18px 0;border:1px solid rgba(250,179,135,.4);background:rgba(250,179,135,.06);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--orange);}
+.adm-closed.open{border-color:var(--accent);background:rgba(124,131,253,.06);color:var(--accent);}
+/* Müşteri penceresindeki reklam kartları */
+.cl-ad.click{cursor:pointer;transition:border-color .15s;}
+.cl-ad.click:hover{border-color:var(--accent);}
+.cl-ad-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.cl-ad-stats div{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:5px 7px;min-width:0;}
+.cl-ad-stats span{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.cl-ad-stats b{display:block;font-family:'DM Mono',monospace;font-size:12.5px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cl-ad-open{font-size:11px;color:var(--accent);font-weight:600;}
+.cl-arc{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.cl-arc-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:8px 11px;border-top:1px solid var(--border);cursor:pointer;background:var(--surface);}
+.cl-arc-row:first-child{border-top:0;}
+.cl-arc-row:hover{background:rgba(124,131,253,.06);}
+.cl-arc-row b{font-size:12.5px;color:var(--text);}
+.cl-arc-row .m{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;}
+.cl-arc-row .n{grid-column:1/-1;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 /* Günlük Plan: müşteri küçük işleri */
 .dp-small{border-top:1px solid var(--border);padding:8px 12px 10px;background:rgba(250,179,135,.04);}
 .dp-small-h{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange);margin-bottom:4px;display:flex;justify-content:space-between;}
@@ -820,7 +896,8 @@ function buildClientDetail(c, wi) {
   const id = esc(c.id), mn = MONTHS_TR[new Date().getMonth()];
   const todo = clPendingTasks(c, wi);
   const order = {kazanan:0, test:1, durdu:2};
-  const ads = [...(c.ads || [])].sort((a, b) => (order[a.state] ?? 1) - (order[b.state] ?? 1) || String(b.startedAt).localeCompare(String(a.startedAt)));
+  const ads = (c.ads || []).filter(a => a.state !== 'durdu').sort((a, b) => (order[a.state] ?? 1) - (order[b.state] ?? 1) || String(b.startedAt).localeCompare(String(a.startedAt)));
+  const arc = (c.ads || []).filter(a => a.state === 'durdu').sort((a, b) => (b.endedAt || '').localeCompare(a.endedAt || ''));
   const notes = [...(c.notes || [])].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt).slice(0, 60);
   return `<div class="cl-det">
     <div class="cl-sec">
@@ -844,24 +921,32 @@ function buildClientDetail(c, wi) {
     </div>
 
     <div class="cl-sec">
-      <div class="cl-sec-h"><h3>Reklamlar</h3><button class="cl-btn sm" onclick="clAdOpen=!clAdOpen;rerenderView()">${clAdOpen ? 'Vazgeç' : 'Reklam ekle'}</button></div>
+      <div class="cl-sec-h"><h3>Reklamlar</h3><div class="cl-actions">
+        ${arc.length ? `<button class="cl-btn sm" onclick="adArchiveOpen('${id}')">🗄 Arşiv (${arc.length})</button>` : ''}
+        <button class="cl-btn sm" onclick="clAdOpen=!clAdOpen;rerenderView()">${clAdOpen ? 'Vazgeç' : 'Reklam ekle'}</button></div></div>
       ${clAdOpen ? `<div class="cl-form">
         <label>Reklam adı<input class="cl-in" id="cl-ad-name" placeholder="Ör. Kasım randevu kampanyası"></label>
         <label>Başlangıç<input class="cl-in" type="date" id="cl-ad-start" value="${clToday()}"></label>
         <label class="full">Neden kurduk<textarea class="cl-ta" id="cl-ad-why" placeholder="Hangi ihtiyaç için kuruldu?"></textarea></label>
         <label class="full">Ne bekliyoruz<textarea class="cl-ta" id="cl-ad-exp" placeholder="Hedef: ör. haftada 20 mesaj, mesaj başı 250 TL altı"></textarea></label>
-        <label>Durum<select class="cl-sel" id="cl-ad-state">${Object.entries(CL_STATE).map(([k, v]) => `<option value="${k}" ${k === 'test' ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+        <label>Durum<select class="cl-sel" id="cl-ad-state"><option value="test" selected>Test</option><option value="kazanan">Kazanan</option></select></label>
         <div style="display:flex;align-items:flex-end;justify-content:flex-end"><button class="cl-btn pri" onclick="clAddAd('${id}')">Reklamı kaydet</button></div>
       </div>` : ''}
-      <div class="cl-ads">${ads.length ? ads.map(a => `<div class="cl-ad ${a.state === 'kazanan' ? 'win' : ''}">
-          <div class="cl-ad-t"><b>${esc(a.name)}</b><select class="cl-sel" onchange="clAdSet('${id}','${a.id}','state',this.value)">${Object.entries(CL_STATE).map(([k, v]) => `<option value="${k}" ${a.state === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
-          <div class="cl-hint">Başlangıç ${clFmt(a.startedAt)}</div>
+      <div class="cl-ads">${ads.length ? ads.map(a => { const t = adTotals(adNorm(a)); return `<div class="cl-ad click ${a.state === 'kazanan' ? 'win' : ''}" onclick="if(!event.target.closest('select,textarea'))adOpen('${id}','${a.id}')" title="Tabloyu, grafiği ve zaman çizelgesini aç">
+          <div class="cl-ad-t"><b>${esc(a.name)}</b><select class="cl-sel" onchange="clAdSet('${id}','${a.id}','state',this.value)">${Object.entries(CL_STATE).map(([k, v]) => `<option value="${k}" ${a.state === k ? 'selected' : ''}>${k === 'durdu' ? 'Durdur ve arşivle…' : v}</option>`).join('')}</select></div>
+          <div class="cl-hint">Başlangıç ${clFmt(a.startedAt)} · ${adSpan(a) || 0}. gün</div>
+          <div class="cl-ad-stats"><div><span>Harcama</span><b>${adMoney(t.spend)}</b></div><div><span>${esc(a.unit)}</span><b>${nf(t.res, 0)}</b></div><div><span>Sonuç başı</span><b>${adMoney(t.cpr)}</b></div></div>
           <div class="cl-kv"><span>Neden kurduk</span>${esc(a.why) || '—'}</div>
           <div class="cl-kv"><span>Beklenti</span>${esc(a.expectation) || '—'}</div>
           <div class="cl-kv"><span>Sonuç notu</span></div>
           <textarea class="cl-ta" placeholder="Ne oldu? Maliyet, mesaj sayısı, karar…" onchange="clAdSet('${id}','${a.id}','result',this.value.trim())">${esc(a.result)}</textarea>
-        </div>`).join('') : '<div class="cl-hint">Kayıtlı reklam yok. "Reklam ekle" ile neden kurduğunu ve ne beklediğini yaz; sonuçları zamanla buraya not edersin.</div>'}</div>
+          <span class="cl-ad-open">📊 Tabloyu ve zaman çizelgesini aç →</span>
+        </div>`; }).join('') : '<div class="cl-hint">Aktif reklam yok. "Reklam ekle" ile neden kurduğunu ve ne beklediğini yaz; sonra karta tıklayıp günlük rakamları tabloya girersin.</div>'}</div>
     </div>
+
+    ${arc.length ? `<div class="cl-sec"><div class="cl-sec-h"><h3>Kapanan reklamlar · arşiv</h3><button class="cl-btn sm" onclick="adArchiveOpen('${id}')">Tablo olarak aç</button></div>
+      <div class="cl-arc">${arc.map(a => { const t = adTotals(adNorm(a)); return `<div class="cl-arc-row" onclick="adOpen('${id}','${a.id}')"><b>${esc(a.name)}</b>
+        <span class="m">${clFmt(a.startedAt)} → ${clFmt(a.endedAt)} · ${adMoney(t.cpr)}</span><span class="n">${esc(a.closeNote) || '—'}</span></div>`; }).join('')}</div></div>` : ''}
 
     <div class="cl-sec">
       <div class="cl-sec-h"><h3>Kayıt geçmişi</h3>
@@ -942,12 +1027,14 @@ function clAddAd(id) {
   if (!name) { document.getElementById('cl-ad-name').focus(); return; }
   clGet(id).ads.push({id:newId(), name, startedAt:document.getElementById('cl-ad-start').value || clToday(),
     why:document.getElementById('cl-ad-why').value.trim(), expectation:document.getElementById('cl-ad-exp').value.trim(),
-    state:document.getElementById('cl-ad-state').value, result:'', createdAt:Date.now()});
+    state:document.getElementById('cl-ad-state').value, result:'', createdAt:Date.now(), unit:'Mesaj', log:[], events:[]});
   clAdOpen = false;
   saveClients(); rerenderView(); toast('✅ Reklam eklendi');
 }
 function clAdSet(id, adId, field, val) {
   const a = (clGet(id)?.ads || []).find(x => x.id === adId); if (!a || a[field] === val) return;
+  if (field === 'state' && val === 'durdu') { adOpen(id, adId, true); return; }   // kapanış notu penceresi
+  if (field === 'state') adEvent(a, `Durum: ${CL_STATE[a.state]} → ${CL_STATE[val]}`);
   a[field] = val; saveClients();
   if (field === 'state') { rerenderView(); toast('Durum: ' + CL_STATE[val]); } else toast('✅ Sonuç notu kaydedildi');
 }
@@ -976,6 +1063,267 @@ function clDelNote(id, nid) {
 function clCopyDraft() {
   const t = document.getElementById('cl-draft');
   navigator.clipboard.writeText(t.value).then(() => toast('✅ Taslak kopyalandı'), () => { t.select(); toast('Metni seçtim, kopyalayabilirsin'); });
+}
+
+/* ══ REKLAM PENCERESİ — Excel benzeri takip tablosu, zaman çizelgesi, kapanış + arşiv ══
+   Reklam alanları (geriye uyumlu): unit (sonuç türü), log:[{id,date,spend,res,note}],
+   events:[{date,text}], endedAt, closeNote */
+const AD_UNITS = ['Mesaj', 'Satış', 'Takipçi', 'Potansiyel müşteri', 'Tıklama', 'Randevu', 'Erişim'];
+let adModal = null;   // {cid, adId, closing} | {cid, archive:true}
+
+function adNorm(a) {
+  if (!Array.isArray(a.log)) a.log = [];
+  if (!Array.isArray(a.events)) a.events = [];
+  if (!a.unit) a.unit = 'Mesaj';
+  return a;
+}
+function adNum(v) {
+  let s = String(v ?? '').trim().replace(/\s|₺|tl/gi, '');
+  if (!s) return null;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+const adMoney = n => n === null || n === undefined || isNaN(n) ? '—' : '₺' + nf(n, n < 100 ? 2 : 0);
+function adRows(a) { return [...adNorm(a).log].sort((x, y) => (x.date || '').localeCompare(y.date || '') || x.id.localeCompare(y.id)); }
+function adTotals(a) {
+  let spend = 0, res = 0;
+  for (const r of a.log || []) { spend += Number(r.spend) || 0; res += Number(r.res) || 0; }
+  return {spend, res, cpr: res ? spend / res : null, days: (a.log || []).length};
+}
+function adSpan(a) {
+  const end = a.state === 'durdu' ? (a.endedAt || a.startedAt) : clToday();
+  const d1 = clParse(a.startedAt), d2 = clParse(end);
+  return d1 && d2 ? Math.max(1, Math.round((d2 - d1) / 86400000) + 1) : null;
+}
+function adFind() {
+  if (!adModal) return {};
+  const c = clGet(adModal.cid);
+  const a = c && adModal.adId ? (c.ads || []).find(x => x.id === adModal.adId) : null;
+  return {c, a: a ? adNorm(a) : null};
+}
+function adEvent(a, text) { adNorm(a).events.push({date: clToday(), text, at: Date.now()}); }
+
+function adOpen(cid, adId, closing) { adModal = {cid, adId, closing: !!closing}; adRender(true); }
+function adArchiveOpen(cid) { adModal = {cid, archive: true}; adRender(true); }
+function adCloseModal() {
+  document.getElementById('adm-root')?.remove();
+  document.body.style.overflow = '';
+  adModal = null;
+  rerenderView();
+}
+
+function adRender(top) {
+  let root = document.getElementById('adm-root');
+  const box = root?.querySelector('.adm-box'), keep = box && !top ? box.scrollTop : 0;
+  if (!root) {
+    root = document.createElement('div'); root.id = 'adm-root'; root.className = 'adm-overlay';
+    root.addEventListener('mousedown', e => { if (e.target === root) adCloseModal(); });
+    document.body.appendChild(root);
+    document.body.style.overflow = 'hidden';
+  }
+  const {c, a} = adFind();
+  if (!c) { adCloseModal(); return; }
+  root.innerHTML = `<div class="adm-box" role="dialog" aria-modal="true">${adModal.archive ? adArchiveHTML(c) : a ? adHTML(c, a) : ''}</div>`;
+  root.querySelector('.adm-box').scrollTop = keep;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && adModal) adCloseModal(); });
+
+function adHTML(c, a) {
+  const t = adTotals(a), rows = adRows(a), closed = a.state === 'durdu', span = adSpan(a);
+  const cid = esc(c.id), aid = esc(a.id);
+  const ev = [{date: a.startedAt, text: 'Reklam başladı'}, ...a.events].filter(e => e.date)
+    .sort((x, y) => x.date.localeCompare(y.date) || (x.at || 0) - (y.at || 0));
+  return `
+  <div class="adm-head">
+    <div style="min-width:0">
+      <div class="adm-crumb">${esc(c.name)} · Reklam</div>
+      <input class="adm-title" value="${esc(a.name)}" onchange="adSet('name',this.value.trim())" aria-label="Reklam adı">
+    </div>
+    <div class="adm-head-r">
+      <span class="cl-pill ${closed ? '' : a.state === 'kazanan' ? 'ok' : 'acc'}">${closed ? '🗄 Arşivde' : CL_STATE[a.state]}</span>
+      <button class="adm-x" onclick="adCloseModal()" title="Kapat (Esc)">×</button>
+    </div>
+  </div>
+
+  <div class="adm-kpis">
+    <div class="adm-kpi"><span>Toplam harcama</span><b>${adMoney(t.spend)}</b></div>
+    <div class="adm-kpi"><span>Toplam ${esc(a.unit.toLocaleLowerCase('tr'))}</span><b>${nf(t.res, 0)}</b></div>
+    <div class="adm-kpi hi"><span>${esc(a.unit)} başı maliyet</span><b>${adMoney(t.cpr)}</b></div>
+    <div class="adm-kpi"><span>Süre</span><b>${span ? span + ' gün' : '—'}</b><em>${clFmt(a.startedAt)} → ${closed ? clFmt(a.endedAt) : 'devam ediyor'}</em></div>
+  </div>
+
+  ${closed ? `<div class="adm-closed"><b>Kapanış notu · ${clFmt(a.endedAt)}</b><textarea class="cl-ta" onchange="adSet('closeNote',this.value.trim())">${esc(a.closeNote)}</textarea>
+      <div style="display:flex;justify-content:flex-end"><button class="cl-btn sm" onclick="adReopen()">↺ Yeniden aç</button></div></div>`
+    : adModal.closing ? `<div class="adm-closed open"><b>Reklamı kapat ve arşive kaldır</b>
+      <div class="cl-form">
+        <label>Bitiş tarihi<input class="cl-in" type="date" id="adm-end" value="${clToday()}"></label>
+        <label>Son durum<select class="cl-sel" id="adm-final"><option value="test">Test olarak kaldı</option><option value="kazanan" ${a.state === 'kazanan' ? 'selected' : ''}>Kazanandı</option></select></label>
+        <label class="full">Kapanış notu — neden kapandı, ne öğrendik?<textarea class="cl-ta" id="adm-note" placeholder="Ör: Mesaj başı 320 TL'ye çıktı, kreatif yoruldu. Bir dahaki sefere video kreatif dene."></textarea></label>
+        <div class="full" style="display:flex;justify-content:flex-end;gap:8px"><button class="cl-btn ghost" onclick="adModal.closing=false;adRender()">Vazgeç</button><button class="cl-btn pri" onclick="adConfirmClose()">Kapat ve arşivle</button></div>
+      </div></div>` : ''}
+
+  <div class="adm-sec">
+    <div class="cl-sec-h"><h3>Takip tablosu</h3>
+      <div class="adm-tools">
+        <label class="adm-unit">Sonuç türü <select class="cl-sel" onchange="adSet('unit',this.value)">${AD_UNITS.map(u => `<option ${u === a.unit ? 'selected' : ''}>${u}</option>`).join('')}</select></label>
+        <button class="cl-btn sm" onclick="adCopyTSV()" title="Excel / Google Sheets'e yapıştırmak için">📋 Excel'e kopyala</button>
+      </div></div>
+    <div class="adm-tw"><table class="adm-table">
+      <thead><tr><th style="width:132px">Tarih</th><th>Harcama ₺</th><th>${esc(a.unit)}</th><th>${esc(a.unit)} başı ₺</th><th style="min-width:180px">Not</th><th style="width:30px"></th></tr></thead>
+      <tbody>${rows.map(r => {
+        const cpr = Number(r.res) ? (Number(r.spend) || 0) / Number(r.res) : null;
+        return `<tr>
+          <td><input type="date" value="${esc(r.date)}" onchange="adRowSet('${r.id}','date',this.value,true)"></td>
+          <td><input inputmode="decimal" class="num" value="${r.spend === null || r.spend === undefined || r.spend === '' ? '' : nf(r.spend, 2)}" onchange="adRowSet('${r.id}','spend',this.value)"></td>
+          <td><input inputmode="decimal" class="num" value="${r.res === null || r.res === undefined || r.res === '' ? '' : nf(r.res, 2)}" onchange="adRowSet('${r.id}','res',this.value)"></td>
+          <td class="calc" id="adm-cpr-${r.id}">${adMoney(cpr)}</td>
+          <td><input value="${esc(r.note)}" placeholder="—" onchange="adRowSet('${r.id}','note',this.value)"></td>
+          <td><button class="btn-icon danger" title="Satırı sil" onclick="adRowDel('${r.id}')">×</button></td></tr>`;
+      }).join('') || `<tr><td colspan="6" class="adm-empty">Henüz satır yok. Reklam panelinden günlük ya da haftalık rakamları gir: harcama ve sonuç sayısı yeter, maliyet kendiliğinden hesaplanır.</td></tr>`}</tbody>
+      <tfoot><tr><td>Toplam${t.days ? ` · ${t.days} satır` : ''}</td><td class="calc" id="adm-t-spend">${adMoney(t.spend)}</td><td class="calc" id="adm-t-res">${nf(t.res, 2)}</td><td class="calc hi" id="adm-t-cpr">${adMoney(t.cpr)}</td><td colspan="2"></td></tr></tfoot>
+    </table></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="cl-hint">Hücreye yaz, Tab ile ilerle. Sayılarda virgül de nokta da olur (1.250 ya da 12,5).</span>
+      <button class="cl-btn pri sm" onclick="adRowAdd()">＋ Satır ekle</button>
+    </div>
+  </div>
+
+  <div class="adm-sec" id="adm-chart-wrap">${adChart(a)}</div>
+
+  <div class="adm-grid2">
+    <div class="adm-sec">
+      <h3 class="adm-h3">Reklam hafızası</h3>
+      <label class="adm-lbl">Neden kurduk<textarea class="cl-ta" onchange="adSet('why',this.value.trim())">${esc(a.why)}</textarea></label>
+      <label class="adm-lbl">Ne bekliyoruz<textarea class="cl-ta" onchange="adSet('expectation',this.value.trim())">${esc(a.expectation)}</textarea></label>
+      <label class="adm-lbl">Sonuç notu (kısa özet — mesaj taslağına girer)<textarea class="cl-ta" onchange="adSet('result',this.value.trim())">${esc(a.result)}</textarea></label>
+      <label class="adm-lbl">Başlangıç<input class="cl-in" type="date" value="${esc(a.startedAt)}" onchange="adSet('startedAt',this.value)"></label>
+    </div>
+    <div class="adm-sec">
+      <h3 class="adm-h3">Zaman çizelgesi</h3>
+      <div class="adm-tl">${ev.map(e => `<div class="adm-ev"><span class="d">${clFmt(e.date)}</span><span class="x">${esc(e.text)}</span></div>`).join('')}
+        ${closed ? '' : `<div class="adm-ev now"><span class="d">${clFmt(clToday())}</span><span class="x">Bugün · ${span || 0}. gün</span></div>`}</div>
+      ${closed ? '' : `<div class="adm-state">Durum
+        <select class="cl-sel" onchange="adChangeState(this.value)">${Object.entries(CL_STATE).map(([k, v]) => `<option value="${k}" ${a.state === k ? 'selected' : ''}>${k === 'durdu' ? 'Durdur ve arşivle…' : v}</option>`).join('')}</select></div>`}
+      <div class="adm-foot">
+        ${closed ? '' : `<button class="cl-btn" onclick="adModal.closing=true;adRender(true)">🗄 Kapat ve arşivle</button>`}
+        <button class="cl-btn ghost" style="color:var(--red)" onclick="adDelete()">Reklamı sil</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function adChart(a) {
+  const rows = adRows(a).filter(r => r.date && (Number(r.spend) || Number(r.res)));
+  if (rows.length < 2) return `<h3 class="adm-h3">Grafik</h3><div class="cl-hint">En az 2 satır girince harcama ve ${esc(a.unit.toLocaleLowerCase('tr'))} başı maliyet grafiği burada çizilir.</div>`;
+  const W = 640, H = 150, P = 26, n = rows.length, bw = Math.min(34, (W - P * 2) / n * 0.6);
+  const sp = rows.map(r => Number(r.spend) || 0), cp = rows.map(r => Number(r.res) ? (Number(r.spend) || 0) / Number(r.res) : null);
+  const maxS = Math.max(...sp, 1), cpv = cp.filter(v => v !== null), maxC = Math.max(...cpv, 1);
+  const x = i => P + (n === 1 ? (W - P * 2) / 2 : i * (W - P * 2) / (n - 1));
+  const bars = sp.map((v, i) => `<rect x="${(x(i) - bw / 2).toFixed(1)}" y="${(H - P - v / maxS * (H - P * 2)).toFixed(1)}" width="${bw.toFixed(1)}" height="${(v / maxS * (H - P * 2)).toFixed(1)}" rx="3" fill="rgba(124,131,253,.35)"><title>${clFmt(rows[i].date)} · harcama ${adMoney(v)}</title></rect>`).join('');
+  const pts = cp.map((v, i) => v === null ? null : [x(i), H - P - v / maxC * (H - P * 2)]);
+  const line = pts.filter(Boolean).map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const dots = pts.map((p, i) => p ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="var(--orange)"><title>${clFmt(rows[i].date)} · ${esc(a.unit.toLocaleLowerCase('tr'))} başı ${adMoney(cp[i])}</title></circle>` : '').join('');
+  const step = Math.ceil(n / 8);
+  const labels = rows.map((r, i) => i % step === 0 || i === n - 1 ? `<text x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${clFmt(r.date)}</text>` : '').join('');
+  return `<div class="cl-sec-h"><h3 class="adm-h3">Grafik</h3><span class="adm-legend"><i style="background:rgba(124,131,253,.55)"></i>Harcama <i style="background:var(--orange);border-radius:50%"></i>${esc(a.unit)} başı maliyet</span></div>
+    <svg class="adm-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}<path d="${line}" fill="none" stroke="var(--orange)" stroke-width="2"/>${dots}${labels}</svg>`;
+}
+
+function adArchiveHTML(c) {
+  const closed = (c.ads || []).filter(a => a.state === 'durdu').map(adNorm)
+    .sort((a, b) => (b.endedAt || '').localeCompare(a.endedAt || ''));
+  const cid = esc(c.id);
+  return `
+  <div class="adm-head"><div><div class="adm-crumb">${esc(c.name)}</div><div class="adm-title" style="border:0">🗄 Reklam arşivi</div></div>
+    <div class="adm-head-r"><button class="adm-x" onclick="adCloseModal()" title="Kapat (Esc)">×</button></div></div>
+  <div class="adm-sec">
+    ${closed.length ? `<div class="adm-tw"><table class="adm-table ro">
+      <thead><tr><th>Reklam</th><th>Başlangıç</th><th>Bitiş</th><th>Süre</th><th>Harcama</th><th>Sonuç</th><th>Sonuç başı</th><th style="min-width:220px">Kapanış notu</th></tr></thead>
+      <tbody>${closed.map(a => { const t = adTotals(a); return `<tr class="click" onclick="adOpen('${cid}','${esc(a.id)}')">
+        <td><b>${esc(a.name)}</b></td><td>${clFmt(a.startedAt)}</td><td>${clFmt(a.endedAt)}</td><td class="calc">${adSpan(a) || '—'} gün</td>
+        <td class="calc">${adMoney(t.spend)}</td><td class="calc">${nf(t.res, 0)} ${esc(a.unit.toLocaleLowerCase('tr'))}</td><td class="calc hi">${adMoney(t.cpr)}</td>
+        <td class="wrap">${esc(a.closeNote) || '—'}</td></tr>`; }).join('')}</tbody></table></div>
+      <span class="cl-hint">Satıra tıkla → reklamın tablosu, grafiği ve zaman çizelgesi açılır.</span>`
+    : '<div class="cl-hint">Arşivde reklam yok. Bir reklamı "Kapat ve arşivle" ile kapatınca kapanış notuyla birlikte buraya gelir.</div>'}
+  </div>`;
+}
+
+function adSave() { saveClients(); }
+function adSet(field, val) {
+  const {a} = adFind(); if (!a || a[field] === val) return;
+  a[field] = val; adSave(); adRender();
+}
+function adRowAdd() {
+  const {a} = adFind(); if (!a) return;
+  const last = adRows(a).slice(-1)[0];
+  // Bir sonraki gün; bugünden ileri gitmez
+  let date = clToday();
+  if (last?.date && last.date < clToday()) date = isoDay(addDays(clParse(last.date), 1));
+  const id = newId();
+  a.log.push({id, date, spend: null, res: null, note: ''});
+  adSave(); adRender();
+  const inp = document.querySelectorAll(`.adm-table tbody tr`);
+  const tr = [...inp].find(r => r.innerHTML.includes(`adm-cpr-${id}`));
+  tr?.querySelectorAll('input')[1]?.focus();
+}
+function adRowSet(rid, field, val, rerender) {
+  const {a} = adFind(); if (!a) return;
+  const r = a.log.find(x => x.id === rid); if (!r) return;
+  r[field] = (field === 'spend' || field === 'res') ? adNum(val) : val;
+  adSave();
+  if (rerender) { adRender(); return; }
+  // Odak kaybolmasın diye sadece hesaplanan hücreleri güncelle
+  const t = adTotals(a), cpr = Number(r.res) ? (Number(r.spend) || 0) / Number(r.res) : null;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('adm-cpr-' + rid, adMoney(cpr)); set('adm-t-spend', adMoney(t.spend)); set('adm-t-res', nf(t.res, 2)); set('adm-t-cpr', adMoney(t.cpr));
+  const ch = document.getElementById('adm-chart-wrap'); if (ch) ch.innerHTML = adChart(a);
+  document.querySelectorAll('.adm-kpi b')[0].textContent = adMoney(t.spend);
+  document.querySelectorAll('.adm-kpi b')[1].textContent = nf(t.res, 0);
+  document.querySelectorAll('.adm-kpi b')[2].textContent = adMoney(t.cpr);
+}
+function adRowDel(rid) {
+  const {a} = adFind(); if (!a) return;
+  a.log = a.log.filter(x => x.id !== rid); adSave(); adRender();
+}
+function adChangeState(v) {
+  const {a} = adFind(); if (!a) return;
+  if (v === 'durdu') { adModal.closing = true; adRender(true); return; }
+  if (a.state === v) return;
+  adEvent(a, `Durum: ${CL_STATE[a.state]} → ${CL_STATE[v]}`);
+  a.state = v; adSave(); adRender();
+}
+function adConfirmClose() {
+  const {a} = adFind(); if (!a) return;
+  const note = document.getElementById('adm-note').value.trim();
+  if (!note) { toast('⚠️ Kapanış notu yaz: neden kapandı, ne öğrendin?'); document.getElementById('adm-note').focus(); return; }
+  const end = document.getElementById('adm-end').value || clToday();
+  const final = document.getElementById('adm-final').value;
+  if (final !== a.state) adEvent(a, `Durum: ${CL_STATE[a.state]} → ${CL_STATE[final]}`);
+  a.events.push({date: end, text: 'Kapatıldı — ' + note, at: Date.now()});
+  a.closedAs = final; a.state = 'durdu'; a.endedAt = end; a.closeNote = note;
+  adModal.closing = false;
+  adSave(); adRender(true); toast('🗄 Reklam arşive kaldırıldı');
+}
+function adReopen() {
+  const {a} = adFind(); if (!a) return;
+  a.state = a.closedAs || 'test'; adEvent(a, 'Yeniden açıldı');
+  a.endedAt = ''; adSave(); adRender(); toast('↺ Reklam yeniden açıldı');
+}
+function adDelete() {
+  const {c, a} = adFind(); if (!a) return;
+  if (!confirm(`"${a.name}" reklamı tablosu ve notlarıyla birlikte silinsin mi? Arşivde tutmak için "Kapat ve arşivle"yi kullan.`)) return;
+  c.ads = c.ads.filter(x => x.id !== a.id); adSave(); adCloseModal(); toast('Reklam silindi');
+}
+function adCopyTSV() {
+  const {c, a} = adFind(); if (!a) return;
+  const t = adTotals(a), f = v => v === null || v === undefined || v === '' ? '' : String(v).replace('.', ',');
+  const lines = [[`${c.name} — ${a.name}`], ['Tarih', 'Harcama (TL)', a.unit, `${a.unit} başı (TL)`, 'Not']];
+  adRows(a).forEach(r => lines.push([r.date, f(r.spend), f(r.res), Number(r.res) ? f(+((Number(r.spend) || 0) / Number(r.res)).toFixed(2)) : '', r.note || '']));
+  lines.push(['Toplam', f(+t.spend.toFixed(2)), f(t.res), t.cpr === null ? '' : f(+t.cpr.toFixed(2)), '']);
+  const tsv = lines.map(l => l.map(x => String(x).replace(/\t|\n/g, ' ')).join('\t')).join('\n');
+  navigator.clipboard.writeText(tsv).then(() => toast("✅ Tablo kopyalandı — Excel'e yapıştır"), () => toast('Kopyalanamadı'));
 }
 
 /* Günlük Plan → bugünün kartında müşteri küçük işleri (günün büyük işinin önüne geçmez) */
