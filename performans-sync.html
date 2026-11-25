@@ -557,7 +557,13 @@ button,input,select,textarea{font-family:var(--font);}
 .sub-day{font-size:11px;color:var(--green);font-weight:600;white-space:nowrap;}
 .sub-x{border:0;background:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:6px;opacity:.5;}
 .sub-x:hover{opacity:1;color:var(--red);background:rgba(215,0,21,.08);}
-.sub-add input{width:100%;border:0;border-bottom:1px dashed var(--border);background:transparent;padding:7px 0;font-family:var(--font);font-size:13.5px;color:var(--text);outline:none;}
+.sub-add{display:flex;align-items:center;gap:10px;}
+.sub-pw{display:inline-flex;align-items:center;gap:2px;font-size:11px;color:var(--muted);}
+.sub-row .sub-pts,.sub-add .sub-pts{width:42px;height:26px;border:0;border-radius:7px;background:#f0f0f3;text-align:center;font-family:var(--font);font-size:12.5px;color:var(--text);padding:0 2px;-moz-appearance:textfield;}
+.sub-pts::-webkit-inner-spin-button,.sub-pts::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.sub-pts:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:#fff;}
+.sub-row.done .sub-pts{color:var(--green);background:rgba(52,199,89,.12);}
+.sub-add input:not(.sub-pts){flex:1;min-width:0;border:0;border-bottom:1px dashed var(--border);background:transparent;padding:7px 0;font-family:var(--font);font-size:13.5px;color:var(--text);outline:none;}
 .sub-add input:focus{border-bottom-color:var(--accent);}
 .sub-empty{font-size:12px;color:var(--muted);padding:4px 0;}
 .sub-mk{margin-left:8px;border:0;background:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:1px 6px;border-radius:980px;opacity:0;transition:opacity .15s;}
@@ -865,8 +871,8 @@ function saveMonth() {
 function taskEarned(wi,ci,ti) {
   const cats=getCats(wi), d=getData(wi);
   const task=cats[ci].tasks[ti];
-  // Başlık: puan, biten madde oranında (4p, 4 maddenin 2'si bitti → 2p)
-  if(isGroup(task)) { const n=task.subs.length; return n ? +(task.pts*(subDoneCount(task)/n)).toFixed(2) : 0; }
+  // Başlık: biten maddelerin puanları toplanır
+  if(isGroup(task)) return +task.subs.reduce((a,x)=>a+(x.done!=null?subPts(x):0),0).toFixed(2);
   const sessions=task.sessions||1;
   const done=(d[ci]?.[ti]||[]).reduce((a,b)=>a+b,0);
   if(sessions===1) {
@@ -1021,12 +1027,12 @@ function gainHTML(wi, ci, ti) {
   const task = getCats(wi)[ci]?.tasks[ti], tgt = weekTarget(wi);
   if (!task || !tgt) return '';
   if (isGroup(task)) {
-    const n = task.subs.length, done = subDoneCount(task), id = `wgain-${wi}-${ci}-${ti}`;
-    const all = task.pts / tgt * 10, per = n ? all / n : 0;
-    const tip = `Bu başlık haftalık notuna toplam +${nf(all)} ekler` + (n ? ` · her madde +${nf(per)}` : '');
-    if (!n) return `<span class="gain" id="${id}" title="${tip}">+${nf(all)} not</span>`;
-    if (done >= n) return `<span class="gain got" id="${id}" title="${tip}">✓ +${nf(all)} alındı</span>`;
-    return `<span class="gain" id="${id}" title="${tip}">madde +${nf(per)} <span class="gs">· kalan +${nf(per * (n - done))}</span></span>`;
+    const n = task.subs.length, id = `wgain-${wi}-${ci}-${ti}`;
+    const all = groupPts(task) / tgt * 10, got = taskEarned(wi, ci, ti) / tgt * 10;
+    const tip = `Bu başlığın maddeleri haftalık notuna toplam +${nf(all)} ekler`;
+    if (!n) return '';
+    if (subDoneCount(task) >= n) return `<span class="gain got" id="${id}" title="${tip}">✓ +${nf(all)} alındı</span>`;
+    return `<span class="gain" id="${id}" title="${tip}">kalan +${nf(all - got)} not${got ? ` <span class="gs">· +${nf(got)} alındı</span>` : ''}</span>`;
   }
   const sess = task.sessions || 1;
   const done = Math.min(sess, taskDoneCount(wi, ci, ti));
@@ -1118,8 +1124,8 @@ function buildTasksView(wi) {
           <span class="task-name">${task.name}${grp?`<span class="grp-tag">${subDoneCount(task)}/${task.subs.length} madde</span>`:''}${badge}${gainHTML(wi,ci,ti)}${grp?'':`<button class="sub-mk" title="Alt maddeli başlığa çevir" onclick="subMake(${wi},${ci},${ti})">＋ madde</button>`}</span>
           ${(()=>{const k=taskKey(cat,task), on=rocks.includes(k);
             return `<button class="rk-tag ${on?'on':''}" data-key="${esc(k)}" title="${on?'Bu haftanın taşı — çıkarmak için dokun':'Bu haftanın 3 taşından biri yap'}" onclick="rkToggle(this.dataset.key)">🎯</button>`;})()}
-          <span class="pts-badge" style="background:${cat.color}26;color:${inkOf(cat.color)};min-width:36px;font-size:9px;padding:2px 4px" title="${grp?`Maddeler bittikçe ${task.pts} puan orantılı dolar`:sess>1?`${sess} oturumda ${task.pts} puan`:`${task.pts} puan`}">
-            ${task.pts}p${!grp&&sess>1?`<span style="opacity:.6;font-size:8px"> /${sess}</span>`:''}
+          <span class="pts-badge" style="background:${cat.color}26;color:${inkOf(cat.color)};min-width:36px;font-size:9px;padding:2px 4px" title="${grp?`Maddelerin puan toplamı: ${tPts(task)}`:sess>1?`${sess} oturumda ${task.pts} puan`:`${task.pts} puan`}">
+            ${grp?'Σ':''}${tPts(task)}p${!grp&&sess>1?`<span style="opacity:.6;font-size:8px"> /${sess}</span>`:''}
           </span>
           ${grp ? DAYS_SHORT.map((_,di)=>{
             const n=cellVal(wi,ci,ti,di);
@@ -1178,10 +1184,13 @@ function taskDoneCount(wi,ci,ti) {
 }
 
 /* ── BAŞLIK + ALT MADDELER ──
-   task.subs = [{id, text, done: gün(0-6) | null}] varsa görev bir başlıktır (ör. "YouTube", müşteri adı).
-   Başlığın tek puanı var; maddeler bittikçe orantılı dolar. Gün kutuları o gün biten madde sayısını gösterir. */
+   task.subs = [{id, text, pts, done: gün(0-6) | null}] varsa görev bir başlıktır (ör. "YouTube", müşteri adı).
+   Her maddenin kendi puanı var; başlığın puanı = maddelerin toplamı. Gün kutuları o gün biten madde sayısını gösterir. */
 const isGroup = t => Array.isArray(t?.subs);
 const subDoneCount = t => t.subs.filter(x => x.done != null).length;
+const subPts = x => (typeof x.pts === 'number' && x.pts >= 0) ? x.pts : 1;
+const groupPts = t => +t.subs.reduce((a, x) => a + subPts(x), 0).toFixed(2);
+const tPts = t => isGroup(t) ? groupPts(t) : t.pts;
 function taskIsDone(wi,ci,ti) {
   const t = getCats(wi)[ci]?.tasks[ti];
   if (!t) return false;
@@ -1200,21 +1209,34 @@ function todayDi(wi) {
   return Math.min(6, Math.max(0, Math.round((t0 - m) / 86400000)));
 }
 function subChanged(wi,ci,ti,wasDone,focus) {
+  const t = getCats(wi)[ci]?.tasks[ti];
+  if (isGroup(t)) t.pts = groupPts(t);   // başlık puanı = madde toplamı
   save(); rerenderView(); updateHeroStats(); updateWeekBtns();
   mtSyncFromWeek(wi,ci,ti,wasDone);
   if (focus) setTimeout(() => document.getElementById(`subin-${wi}-${ci}-${ti}`)?.focus(), 0);
 }
 function subAdd(wi,ci,ti,inp) {
-  const text = inp.value.trim(); if (!text) return;
+  const tin = document.getElementById(`subin-${wi}-${ci}-${ti}`), pin = document.getElementById(`subpt-${wi}-${ci}-${ti}`);
+  const text = (tin?.value || '').trim(); if (!text) { tin?.focus(); return; }
+  const pts = Math.max(0, Math.min(20, parseFloat(String(pin?.value || '1').replace(',', '.')) || 1));
   const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
-  t.subs.push({id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), text, done: null});
+  subLastPts = pts;
+  t.subs.push({id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), text, pts, done: null});
   subChanged(wi,ci,ti,was,true);
+}
+let subLastPts = 1;   // yeni madde kutusu son girilen puanla açılır
+function subSetPts(wi,ci,ti,si,v) {
+  const n = parseFloat(String(v).replace(',', '.'));
+  if (isNaN(n)) return rerenderView();
+  const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
+  t.subs[si].pts = Math.max(0, Math.min(20, Math.round(n * 2) / 2));
+  subChanged(wi,ci,ti,was);
 }
 function subToggle(wi,ci,ti,si,on) {
   const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
   t.subs[si].done = on ? todayDi(wi) : null;
   subChanged(wi,ci,ti,was);
-  if (on && taskIsDone(wi,ci,ti)) toast(`✅ ${t.name}: tüm maddeler bitti · +${nf(t.pts)} puan`);
+  if (on) toast(taskIsDone(wi,ci,ti) ? `✅ ${t.name}: tüm maddeler bitti · toplam ${nf(groupPts(t))} puan` : `✓ +${nf(subPts(t.subs[si]))} puan`);
 }
 function subDel(wi,ci,ti,si) {
   const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
@@ -1223,19 +1245,22 @@ function subDel(wi,ci,ti,si) {
 }
 function subMake(wi,ci,ti) {
   const t = getCats(wi)[ci].tasks[ti];
-  if (taskDoneCount(wi,ci,ti) > 0 && !confirm(`"${t.name}" alt maddeli başlığa çevrilecek. Bu haftaki gün işaretleri yerine maddeler sayılacak. Devam?`)) return;
+  if (!confirm(`"${t.name}" alt maddeli başlığa çevrilecek. Puanı artık altına yazacağın maddelerin puanlarından gelecek${taskDoneCount(wi,ci,ti) > 0 ? ' (bu haftaki gün işaretleri sayılmaz)' : ''}. Devam?`)) return;
   t.subs = [];
+  t.pts = 0;
   subChanged(wi,ci,ti,taskIsDone(wi,ci,ti),true);
 }
 function buildSubList(wi,ci,ti,task) {
   const rows = task.subs.map((x,si) => `<div class="sub-row ${x.done!=null?'done':''}">
       <label><input type="checkbox" ${x.done!=null?'checked':''} onchange="subToggle(${wi},${ci},${ti},${si},this.checked)"><span class="st">${esc(x.text)}</span></label>
       ${x.done!=null?`<span class="sub-day">✓ ${DAYS_SHORT[x.done]}</span>`:''}
+      <span class="sub-pw"><input type="number" class="sub-pts" min="0" max="20" step="0.5" value="${subPts(x)}" title="Maddenin puanı" onchange="subSetPts(${wi},${ci},${ti},${si},this.value)">p</span>
       <button class="sub-x" title="Maddeyi sil" onclick="subDel(${wi},${ci},${ti},${si})">✕</button>
     </div>`).join('');
   return `<div class="sub-list">
     ${rows || '<div class="sub-empty">Henüz madde yok — altına yazıp Enter\'a bas.</div>'}
-    <div class="sub-add"><input id="subin-${wi}-${ci}-${ti}" placeholder="＋ Madde ekle… (Enter)" onkeydown="if(event.key==='Enter')subAdd(${wi},${ci},${ti},this)"></div>
+    <div class="sub-add"><input id="subin-${wi}-${ci}-${ti}" placeholder="＋ Madde ekle… (Enter)" onkeydown="if(event.key==='Enter')subAdd(${wi},${ci},${ti})">
+      <span class="sub-pw"><input type="number" class="sub-pts" id="subpt-${wi}-${ci}-${ti}" min="0" max="20" step="0.5" value="${subLastPts}" title="Yeni maddenin puanı" onkeydown="if(event.key==='Enter')subAdd(${wi},${ci},${ti})">p</span></div>
   </div>`;
 }
 
@@ -1247,7 +1272,7 @@ function copyFromPrev(wi) {
   if(!confirm(`Hafta ${wi} görev listesini bu haftaya (${WEEKS[wi].label}) kopyalamak ister misin?\nMevcut bu haftanın görevleri silinecek.`)) return;
   weekCats[wi] = JSON.parse(JSON.stringify(getCats(wi-1)));
   // Başlıklarda sadece bitmemiş maddeler taşınır
-  weekCats[wi].forEach(c => c.tasks.forEach(t => { if (isGroup(t)) t.subs = t.subs.filter(x => x.done == null); }));
+  weekCats[wi].forEach(c => c.tasks.forEach(t => { if (isGroup(t)) { t.subs = t.subs.filter(x => x.done == null); t.pts = groupPts(t); } }));
   syncWeekData(wi);
   save();
   toast('✅ Önceki haftadan kopyalandı!');
@@ -1276,8 +1301,8 @@ function buildCatEditor(wi,cat,ci) {
       <div class="task-ed-row" id="tr-${wi}-${ci}-${ti}">
         <span class="drag-h">⠿</span>
         <input class="task-name-in" id="tn-${wi}-${ci}-${ti}" value="${task.name}" placeholder="Görev adı...">
-        <input type="number" class="small-num" id="tp-${wi}-${ci}-${ti}" value="${task.pts}" min="1" max="20" title="Puan">
-        <span style="font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums">p</span>
+        ${isGroup(task) ? `<span class="grp-ed" title="Başlığın puanı = maddelerin toplamı">Σ ${tPts(task)}p</span>` : `<input type="number" class="small-num" id="tp-${wi}-${ci}-${ti}" value="${task.pts}" min="1" max="20" title="Puan">
+        <span style="font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums">p</span>`}
         ${isGroup(task) ? `<span class="grp-ed" title="Alt maddeli başlık — maddeleri görev sayfasında ekle">📂 ${task.subs.length} madde</span>` : `<span style="font-size:9px;color:var(--muted);margin-left:4px" title="Haftalık oturum sayısı">×</span>
         <input type="number" class="small-num" id="ts-${wi}-${ci}-${ti}" value="${task.sessions||1}" min="1" max="7" title="Haftalık kaç oturumda tamamlanır?">
         <span style="font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums" title="Oturum sayısı">otr</span>`}
@@ -1299,7 +1324,7 @@ function buildCatEditor(wi,cat,ci) {
         <option value="">Serbest</option>
         ${DAYS_SHORT.map((d,di)=>`<option value="${di}">⏰ ${d}</option>`).join('')}
       </select>
-      <label class="grp-chk" title="Müşteri adı / YouTube gibi bir başlık; maddeleri görev sayfasında altına yazarsın"><input type="checkbox" id="ng-${wi}-${ci}"> 📂 başlık</label>
+      <label class="grp-chk" title="Müşteri adı / YouTube gibi bir başlık; maddeleri ve puanlarını görev sayfasında altına yazarsın (puan kutusu kullanılmaz)"><input type="checkbox" id="ng-${wi}-${ci}"> 📂 başlık</label>
       <button class="btn-add" onclick="addTask(${wi},${ci})">Ekle</button>
     </div>
   </div>`;
@@ -1352,7 +1377,7 @@ function addTask(wi,ci) {
   const sessions=Math.min(7,Math.max(1,parseInt(sessEl?.value)||1));
   const deadline = dlEl && dlEl.value!=='' ? parseInt(dlEl.value) : null;
   const grp = document.getElementById(`ng-${wi}-${ci}`)?.checked;
-  getCats(wi)[ci].tasks.push(grp ? {name,pts,sessions:1,deadline,subs:[]} : {name,pts,sessions,deadline});
+  getCats(wi)[ci].tasks.push(grp ? {name,pts:0,sessions:1,deadline,subs:[]} : {name,pts,sessions,deadline});
   rerenderCatEd(wi,ci);
   setTimeout(()=>{ const el=document.getElementById(`nt-${wi}-${ci}`); if(el){el.value='';el.focus();} },30);
 }
