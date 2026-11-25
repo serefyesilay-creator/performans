@@ -557,9 +557,30 @@ button,input,select,textarea{font-family:var(--font);}
 .sub-day{font-size:11px;color:var(--green);font-weight:600;white-space:nowrap;}
 .sub-x{border:0;background:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:6px;opacity:.5;}
 .sub-x:hover{opacity:1;color:var(--red);background:rgba(215,0,21,.08);}
+.sub-wrap{background:#fbfbfd;}
+.sub-row2{display:grid;align-items:center;gap:6px;padding:5px 18px 5px 34px;border-top:1px solid var(--hair);}
+.sub-nm{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;min-width:0;font-size:13.5px;color:var(--text);}
+.sub-nm .st{overflow-wrap:anywhere;}
+.sub-row2.done .st{text-decoration:line-through;color:var(--muted);}
+.sub-row2.done .sub-pts{color:var(--green);background:rgba(52,199,89,.12);}
+.sub-row2 .sub-x{opacity:.35;}
+.sub-row2:hover .sub-x{opacity:.8;}
+.sub-earn{font-size:10.5px;color:var(--muted);text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.sub-earn b{color:var(--green);font-weight:600;}
+.sub-pts.sess{width:30px;margin-left:2px;}
+.sub-wrap .sub-add{padding:6px 18px 10px 34px;}
+.sub-wrap .sub-empty{padding:8px 18px 0 34px;}
+@media(max-width:700px){
+  .sub-row2{grid-template-columns:repeat(7,32px)!important;justify-content:end;padding-left:24px;row-gap:6px;}
+  .sub-row2 .sub-nm{grid-column:1/-1;}
+  .sub-row2>span:nth-child(2){display:none;}
+  .sub-row2 .sub-earn{grid-column:1/-1;text-align:left;}
+  .sub-wrap .sub-add,.sub-wrap .sub-empty{padding-left:24px;}
+}
+.auto-tgt{font-size:10px;font-weight:600;color:var(--accent);background:rgba(0,113,227,.1);border-radius:980px;padding:1px 7px;margin-left:4px;}
 .sub-add{display:flex;align-items:center;gap:10px;}
 .sub-pw{display:inline-flex;align-items:center;gap:2px;font-size:11px;color:var(--muted);}
-.sub-row .sub-pts,.sub-add .sub-pts{width:42px;height:26px;border:0;border-radius:7px;background:#f0f0f3;text-align:center;font-family:var(--font);font-size:12.5px;color:var(--text);padding:0 2px;-moz-appearance:textfield;}
+.sub-row .sub-pts,.sub-row2 .sub-pts,.sub-add .sub-pts{width:42px;height:26px;border:0;border-radius:7px;background:#f0f0f3;text-align:center;font-family:var(--font);font-size:12.5px;color:var(--text);padding:0 2px;-moz-appearance:textfield;}
 .sub-pts::-webkit-inner-spin-button,.sub-pts::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 .sub-pts:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:#fff;}
 .sub-row.done .sub-pts{color:var(--green);background:rgba(52,199,89,.12);}
@@ -643,6 +664,15 @@ while(cur <= END_OF_YEAR) {
   });
   cur = addDays(cur,7);
 }
+// Bugünün haftası: bu hafta ve sonrasında kategori hedefi otomatik (görev puanları toplamı).
+// Geçmiş haftalar elle girilmiş hedefini korur, eski notlar değişmez.
+const TODAY_WI = (() => {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const i = WEEKS.findIndex(w => { const m = new Date(w.mon); m.setHours(0,0,0,0); return t >= m && t - m < 7*86400000; });
+  if (i >= 0) return i;
+  return t < WEEKS[0].mon ? 0 : WEEKS.length;
+})();
+function autoTarget(wi) { return wi >= TODAY_WI; }
 
 // Quarter groupings (by actual quarter of start month)
 // Q1=Feb-Mar(0-1 but starts Feb), Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec
@@ -813,6 +843,9 @@ let monthTasks = JSON.parse(localStorage.getItem('mt26') || 'null') || {};
 
 function getCats(wi) {
   if(!weekCats[wi]) weekCats[wi] = JSON.parse(JSON.stringify(DEFAULT_CATS));
+  if (autoTarget(wi)) weekCats[wi].forEach(c => {
+    c.target = +c.tasks.reduce((a, t) => { if (isGroup(t)) t.pts = groupPts(t); return a + (+t.pts || 0); }, 0).toFixed(2);
+  });
   return weekCats[wi];
 }
 
@@ -871,8 +904,8 @@ function saveMonth() {
 function taskEarned(wi,ci,ti) {
   const cats=getCats(wi), d=getData(wi);
   const task=cats[ci].tasks[ti];
-  // Başlık: biten maddelerin puanları toplanır
-  if(isGroup(task)) return +task.subs.reduce((a,x)=>a+(x.done!=null?subPts(x):0),0).toFixed(2);
+  // Başlık: maddelerin kazandığı puanlar toplanır (her madde kendi oturum oranıyla)
+  if(isGroup(task)) return +task.subs.reduce((a,x)=>a+subEarned(x),0).toFixed(2);
   const sessions=task.sessions||1;
   const done=(d[ci]?.[ti]||[]).reduce((a,b)=>a+b,0);
   if(sessions===1) {
@@ -1121,7 +1154,7 @@ function buildTasksView(wi) {
           badge=`<span class="free-badge">serbest</span>`;
         }
         return `<div class="task-row ${grp?'grp-row':''} ${rowCls} ${rocks.includes(taskKey(cat,task))?'is-rock':''}" style="grid-template-columns:${gc}">
-          <span class="task-name">${task.name}${grp?`<span class="grp-tag">${subDoneCount(task)}/${task.subs.length} madde</span>`:''}${badge}${gainHTML(wi,ci,ti)}${grp?'':`<button class="sub-mk" title="Alt maddeli başlığa çevir" onclick="subMake(${wi},${ci},${ti})">＋ madde</button>`}</span>
+          <span class="task-name">${task.name}${grp?`<span class="grp-tag" id="gtag-${wi}-${ci}-${ti}">${subDoneCount(task)}/${task.subs.length} madde</span>`:''}${badge}${gainHTML(wi,ci,ti)}${grp?'':`<button class="sub-mk" title="Alt maddeli başlığa çevir" onclick="subMake(${wi},${ci},${ti})">＋ madde</button>`}</span>
           ${(()=>{const k=taskKey(cat,task), on=rocks.includes(k);
             return `<button class="rk-tag ${on?'on':''}" data-key="${esc(k)}" title="${on?'Bu haftanın taşı — çıkarmak için dokun':'Bu haftanın 3 taşından biri yap'}" onclick="rkToggle(this.dataset.key)">🎯</button>`;})()}
           <span class="pts-badge" style="background:${cat.color}26;color:${inkOf(cat.color)};min-width:36px;font-size:9px;padding:2px 4px" title="${grp?`Maddelerin puan toplamı: ${tPts(task)}`:sess>1?`${sess} oturumda ${task.pts} puan`:`${task.pts} puan`}">
@@ -1130,7 +1163,7 @@ function buildTasksView(wi) {
           ${grp ? DAYS_SHORT.map((_,di)=>{
             const n=cellVal(wi,ci,ti,di);
             const dlCell = dl===di ? (rowCls.includes('overdue')?'deadline-cell overdue':'deadline-cell') : '';
-            return `<span class="day-cnt ${n?'done':''} ${dlCell}" title="${n?`${DAYS_SHORT[di]}: ${n} madde bitti`:''}">${n||''}</span>`;
+            return `<span class="day-cnt ${n?'done':''} ${dlCell}" id="gcnt-${wi}-${ci}-${ti}-${di}" title="Bu gün yapılan madde oturumları">${n||''}</span>`;
           }).join('') : DAYS_SHORT.map((_,di)=>{
             const val=data[ci]?.[ti]?.[di]||0;
             const doneClass=val>=sess?'done':val>0?'partial':'';
@@ -1141,7 +1174,7 @@ function buildTasksView(wi) {
               title="${dl===di?`⏰ Deadline günü`:sess>1?`Hedef: ${sess} oturum — bugün: ${val}`:''}"
               onchange="updateCell(this,${wi},${ci},${ti},${di})">`;
           }).join('')}
-        </div>${grp?buildSubList(wi,ci,ti,task):''}`;
+        </div>${grp?buildSubList(wi,ci,ti,task,gc):''}`;
       }).join('')}
     </div>`;
   });
@@ -1162,6 +1195,15 @@ function updateCell(input,wi,ci,ti,di) {
   if(val>=sessions) input.classList.add('done');
   else if(val>0) input.classList.add('partial');
   save();
+  refreshScores(wi,ci);
+  const g=id=>document.getElementById(id);
+  const gEl=g(`wgain-${wi}-${ci}-${ti}`);
+  if(gEl) gEl.outerHTML=gainHTML(wi,ci,ti);
+  updateHeroStats();
+  updateWeekBtns();
+  mtSyncFromWeek(wi,ci,ti,wasDone);
+}
+function refreshScores(wi,ci) {
   const total=weekTotal(wi),apct=autoPct(wi),pct=weekPct(wi);
   const g=id=>document.getElementById(id);
   if(g(`wtotal-${wi}`)) g(`wtotal-${wi}`).textContent=Number.isInteger(total)?total:total.toFixed(1);
@@ -1172,11 +1214,6 @@ function updateCell(input,wi,ci,ti,di) {
   if(g(`wn-auto-${wi}`)) g(`wn-auto-${wi}`).textContent=calcGrade(apct).toFixed(1);
   if(g(`wpill-${wi}`)) g(`wpill-${wi}`).innerHTML=pill(pct);
   if(g(`wcat-${wi}-${ci}`)) g(`wcat-${wi}-${ci}`).textContent=(t=>Number.isInteger(t)?t:t.toFixed(1))(catTotal(wi,ci));
-  const gEl=g(`wgain-${wi}-${ci}-${ti}`);
-  if(gEl) gEl.outerHTML=gainHTML(wi,ci,ti);
-  updateHeroStats();
-  updateWeekBtns();
-  mtSyncFromWeek(wi,ci,ti,wasDone);
 }
 
 function taskDoneCount(wi,ci,ti) {
@@ -1184,13 +1221,27 @@ function taskDoneCount(wi,ci,ti) {
 }
 
 /* ── BAŞLIK + ALT MADDELER ──
-   task.subs = [{id, text, pts, done: gün(0-6) | null}] varsa görev bir başlıktır (ör. "YouTube", müşteri adı).
-   Her maddenin kendi puanı var; başlığın puanı = maddelerin toplamı. Gün kutuları o gün biten madde sayısını gösterir. */
-const isGroup = t => Array.isArray(t?.subs);
-const subDoneCount = t => t.subs.filter(x => x.done != null).length;
-const subPts = x => (typeof x.pts === 'number' && x.pts >= 0) ? x.pts : 1;
-const groupPts = t => +t.subs.reduce((a, x) => a + subPts(x), 0).toFixed(2);
-const tPts = t => isGroup(t) ? groupPts(t) : t.pts;
+   task.subs = [{id, text, pts, sessions, days:[7]}] varsa görev bir başlıktır (ör. "YouTube", müşteri adı).
+   Her madde normal görev gibi işlenir: puan × oturum, gün gün giriş; kazanılan = puan × (yapılan/oturum).
+   Başlığın puanı = maddelerin toplamı; başlığın gün kutuları o gün yapılan madde oturumlarının toplamı. */
+function isGroup(t) { return Array.isArray(t?.subs); }
+function subNorm(x) {
+  if (!Array.isArray(x.days)) {            // eski biçim: done = gün → o güne 1 oturum
+    x.days = Array(7).fill(0);
+    if (typeof x.done === 'number' && x.done >= 0 && x.done < 7) x.days[x.done] = 1;
+  }
+  if ('done' in x) delete x.done;
+  if (!(x.sessions >= 1)) x.sessions = 1;
+  return x;
+}
+function subPts(x) { return (typeof x.pts === 'number' && x.pts >= 0) ? x.pts : 1; }
+function subSess(x) { return Math.min(7, Math.max(1, subNorm(x).sessions)); }
+function subSum(x) { return subNorm(x).days.reduce((a, b) => a + (b || 0), 0); }
+function subComplete(x) { return subSum(x) >= subSess(x); }
+function subEarned(x) { const n = subSess(x); return +(subPts(x) * Math.min(subSum(x), n) / n).toFixed(2); }
+function subDoneCount(t) { return t.subs.filter(subComplete).length; }
+function groupPts(t) { return +t.subs.reduce((a, x) => a + subPts(x), 0).toFixed(2); }
+function tPts(t) { return isGroup(t) ? groupPts(t) : t.pts; }
 function taskIsDone(wi,ci,ti) {
   const t = getCats(wi)[ci]?.tasks[ti];
   if (!t) return false;
@@ -1199,44 +1250,62 @@ function taskIsDone(wi,ci,ti) {
 }
 function cellVal(wi,ci,ti,di) {
   const t = getCats(wi)[ci]?.tasks[ti];
-  if (isGroup(t)) return t.subs.filter(x => x.done === di).length;
+  if (isGroup(t)) return t.subs.reduce((a, x) => a + (subNorm(x).days[di] || 0), 0);
   return weekData[wi]?.[ci]?.[ti]?.[di] || 0;
 }
-// Madde işaretlenince hangi güne yazılır: bu haftadaysak bugün, geçmiş haftada Pazar, gelecek haftada Pazartesi
-function todayDi(wi) {
-  const t0 = new Date(); t0.setHours(0,0,0,0);
-  const m = new Date(WEEKS[wi].mon); m.setHours(0,0,0,0);
-  return Math.min(6, Math.max(0, Math.round((t0 - m) / 86400000)));
-}
+const subId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+let subLastPts = 1, subLastSess = 1;   // yeni madde kutuları son girilen değerlerle açılır
+// Yapı değişikliği (ekle/sil/puan/oturum): tüm görünüm yeniden çizilir, hedef otomatik güncellenir
 function subChanged(wi,ci,ti,wasDone,focus) {
   const t = getCats(wi)[ci]?.tasks[ti];
   if (isGroup(t)) t.pts = groupPts(t);   // başlık puanı = madde toplamı
+  getCats(wi);                            // otomatik kategori hedefini tazele
   save(); rerenderView(); updateHeroStats(); updateWeekBtns();
   mtSyncFromWeek(wi,ci,ti,wasDone);
   if (focus) setTimeout(() => document.getElementById(`subin-${wi}-${ci}-${ti}`)?.focus(), 0);
 }
-function subAdd(wi,ci,ti,inp) {
-  const tin = document.getElementById(`subin-${wi}-${ci}-${ti}`), pin = document.getElementById(`subpt-${wi}-${ci}-${ti}`);
-  const text = (tin?.value || '').trim(); if (!text) { tin?.focus(); return; }
-  const pts = Math.max(0, Math.min(20, parseFloat(String(pin?.value || '1').replace(',', '.')) || 1));
+const numIn = (v, def, lo, hi, step) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isNaN(n) ? def : Math.max(lo, Math.min(hi, Math.round(n / step) * step)); };
+function subAdd(wi,ci,ti) {
+  const g = id => document.getElementById(`${id}-${wi}-${ci}-${ti}`);
+  const text = (g('subin')?.value || '').trim(); if (!text) { g('subin')?.focus(); return; }
+  const pts = numIn(g('subpt')?.value, 1, 0, 20, 0.5), sessions = numIn(g('subss')?.value, 1, 1, 7, 1);
   const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
-  subLastPts = pts;
-  t.subs.push({id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), text, pts, done: null});
+  subLastPts = pts; subLastSess = sessions;
+  t.subs.push({id: subId(), text, pts, sessions, days: Array(7).fill(0)});
   subChanged(wi,ci,ti,was,true);
 }
-let subLastPts = 1;   // yeni madde kutusu son girilen puanla açılır
 function subSetPts(wi,ci,ti,si,v) {
-  const n = parseFloat(String(v).replace(',', '.'));
-  if (isNaN(n)) return rerenderView();
   const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
-  t.subs[si].pts = Math.max(0, Math.min(20, Math.round(n * 2) / 2));
+  t.subs[si].pts = numIn(v, subPts(t.subs[si]), 0, 20, 0.5);
   subChanged(wi,ci,ti,was);
 }
-function subToggle(wi,ci,ti,si,on) {
-  const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
-  t.subs[si].done = on ? todayDi(wi) : null;
+function subSetSess(wi,ci,ti,si,v) {
+  const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti), x = subNorm(t.subs[si]);
+  x.sessions = numIn(v, x.sessions, 1, 7, 1);
+  x.days = x.days.map(d => Math.min(d || 0, x.sessions));
   subChanged(wi,ci,ti,was);
-  if (on) toast(taskIsDone(wi,ci,ti) ? `✅ ${t.name}: tüm maddeler bitti · toplam ${nf(groupPts(t))} puan` : `✓ +${nf(subPts(t.subs[si]))} puan`);
+}
+// Gün kutusu: sadece ilgili hücreler ve puan kartları güncellenir (odak kaybolmaz)
+function subCell(input,wi,ci,ti,si,di) {
+  const t = getCats(wi)[ci].tasks[ti], x = subNorm(t.subs[si]), sess = subSess(x);
+  const was = taskIsDone(wi,ci,ti), wasSub = subComplete(x);
+  const val = Math.min(sess, Math.max(0, parseInt(input.value) || 0));
+  input.value = val; x.days[di] = val;
+  input.classList.remove('done','partial');
+  if (val >= sess) input.classList.add('done'); else if (val > 0) input.classList.add('partial');
+  save();
+  const g = id => document.getElementById(id);
+  const row = g(`srow-${wi}-${ci}-${ti}-${si}`); if (row) row.classList.toggle('done', subComplete(x));
+  const er = g(`searn-${wi}-${ci}-${ti}-${si}`); if (er) er.textContent = nf(subEarned(x));
+  const n = cellVal(wi,ci,ti,di), gc = g(`gcnt-${wi}-${ci}-${ti}-${di}`);
+  if (gc) { gc.textContent = n || ''; gc.classList.toggle('done', n > 0); }
+  const tag = g(`gtag-${wi}-${ci}-${ti}`); if (tag) tag.textContent = `${subDoneCount(t)}/${t.subs.length} madde`;
+  refreshScores(wi, ci);
+  const gEl = g(`wgain-${wi}-${ci}-${ti}`); if (gEl) gEl.outerHTML = gainHTML(wi,ci,ti);
+  updateHeroStats(); updateWeekBtns();
+  mtSyncFromWeek(wi,ci,ti,was);
+  if (!was && taskIsDone(wi,ci,ti)) toast(`✅ ${t.name}: tüm maddeler bitti · toplam ${nf(groupPts(t))} puan`);
+  else if (!wasSub && subComplete(x)) toast(`✓ ${x.text} tamamlandı · +${nf(subPts(x))} puan`);
 }
 function subDel(wi,ci,ti,si) {
   const t = getCats(wi)[ci].tasks[ti], was = taskIsDone(wi,ci,ti);
@@ -1250,17 +1319,25 @@ function subMake(wi,ci,ti) {
   t.pts = 0;
   subChanged(wi,ci,ti,taskIsDone(wi,ci,ti),true);
 }
-function buildSubList(wi,ci,ti,task) {
-  const rows = task.subs.map((x,si) => `<div class="sub-row ${x.done!=null?'done':''}">
-      <label><input type="checkbox" ${x.done!=null?'checked':''} onchange="subToggle(${wi},${ci},${ti},${si},this.checked)"><span class="st">${esc(x.text)}</span></label>
-      ${x.done!=null?`<span class="sub-day">✓ ${DAYS_SHORT[x.done]}</span>`:''}
-      <span class="sub-pw"><input type="number" class="sub-pts" min="0" max="20" step="0.5" value="${subPts(x)}" title="Maddenin puanı" onchange="subSetPts(${wi},${ci},${ti},${si},this.value)">p</span>
-      <button class="sub-x" title="Maddeyi sil" onclick="subDel(${wi},${ci},${ti},${si})">✕</button>
-    </div>`).join('');
-  return `<div class="sub-list">
+function buildSubList(wi,ci,ti,task,gc) {
+  const rows = task.subs.map((x,si) => {
+    const sess = subSess(x), id = `${wi}-${ci}-${ti}-${si}`;
+    return `<div class="sub-row2 ${subComplete(x)?'done':''}" id="srow-${id}" style="grid-template-columns:${gc}">
+      <span class="sub-nm"><span class="st">${esc(x.text)}</span>
+        <span class="sub-pw" title="Puan × haftalık oturum"><input type="number" class="sub-pts" min="0" max="20" step="0.5" value="${subPts(x)}" title="Maddenin puanı" onchange="subSetPts(${wi},${ci},${ti},${si},this.value)">p
+          ×<input type="number" class="sub-pts sess" min="1" max="7" value="${sess}" title="Haftalık kaç oturumda tamamlanır?" onchange="subSetSess(${wi},${ci},${ti},${si},this.value)">otr</span>
+        <button class="sub-x" title="Maddeyi sil" onclick="subDel(${wi},${ci},${ti},${si})">✕</button></span>
+      <span></span>
+      <span class="sub-earn" title="Kazanılan / maddenin puanı"><b id="searn-${id}">${nf(subEarned(x))}</b>/${nf(subPts(x))}</span>
+      ${DAYS_SHORT.map((_,di) => { const v = x.days[di] || 0;
+        return `<input type="number" min="0" max="${sess}" class="day-input ${v>=sess?'done':v>0?'partial':''}" value="${v}" title="${sess>1?`Hedef: ${sess} oturum`:''}" onchange="subCell(this,${wi},${ci},${ti},${si},${di})">`; }).join('')}
+    </div>`;
+  }).join('');
+  return `<div class="sub-wrap">
     ${rows || '<div class="sub-empty">Henüz madde yok — altına yazıp Enter\'a bas.</div>'}
     <div class="sub-add"><input id="subin-${wi}-${ci}-${ti}" placeholder="＋ Madde ekle… (Enter)" onkeydown="if(event.key==='Enter')subAdd(${wi},${ci},${ti})">
-      <span class="sub-pw"><input type="number" class="sub-pts" id="subpt-${wi}-${ci}-${ti}" min="0" max="20" step="0.5" value="${subLastPts}" title="Yeni maddenin puanı" onkeydown="if(event.key==='Enter')subAdd(${wi},${ci},${ti})">p</span></div>
+      <span class="sub-pw"><input type="number" class="sub-pts" id="subpt-${wi}-${ci}-${ti}" min="0" max="20" step="0.5" value="${subLastPts}" title="Yeni maddenin puanı" onkeydown="if(event.key==='Enter')subAdd(${wi},${ci},${ti})">p
+        ×<input type="number" class="sub-pts sess" id="subss-${wi}-${ci}-${ti}" min="1" max="7" value="${subLastSess}" title="Haftalık oturum" onkeydown="if(event.key==='Enter')subAdd(${wi},${ci},${ti})">otr</span></div>
   </div>`;
 }
 
@@ -1271,8 +1348,8 @@ function copyFromPrev(wi) {
   if(wi===0){toast('İlk hafta, kopyalanacak önceki hafta yok');return;}
   if(!confirm(`Hafta ${wi} görev listesini bu haftaya (${WEEKS[wi].label}) kopyalamak ister misin?\nMevcut bu haftanın görevleri silinecek.`)) return;
   weekCats[wi] = JSON.parse(JSON.stringify(getCats(wi-1)));
-  // Başlıklarda sadece bitmemiş maddeler taşınır
-  weekCats[wi].forEach(c => c.tasks.forEach(t => { if (isGroup(t)) { t.subs = t.subs.filter(x => x.done == null); t.pts = groupPts(t); } }));
+  // Başlıklarda sadece tamamlanmamış maddeler taşınır (gün girişleri sıfırlanır)
+  weekCats[wi].forEach(c => c.tasks.forEach(t => { if (isGroup(t)) { t.subs = t.subs.filter(x => !subComplete(x)).map(x => ({...x, days: Array(7).fill(0)})); t.pts = groupPts(t); } }));
   syncWeekData(wi);
   save();
   toast('✅ Önceki haftadan kopyalandı!');
@@ -1292,8 +1369,9 @@ function buildCatEditor(wi,cat,ci) {
       <input class="cat-name-in" id="cn-${wi}-${ci}" value="${cat.name}" placeholder="Kategori adı...">
       <div class="tgt-wrap">
         <span>Hedef:</span>
-        <input type="number" class="small-num" id="ct-${wi}-${ci}" value="${cat.target}" min="1" max="50" oninput="updatePtsWarn(${wi})">
-        <span>p</span>
+        ${autoTarget(wi) ? `<b title="Görev ve madde puanlarının toplamı — kaydedince güncellenir">${nf(cat.target)}p</b><span class="auto-tgt">otomatik</span>`
+          : `<input type="number" class="small-num" id="ct-${wi}-${ci}" value="${cat.target}" min="1" max="50" oninput="updatePtsWarn(${wi})">
+        <span>p</span>`}
       </div>
       <button class="btn-icon danger" onclick="removeCat(${wi},${ci})">🗑</button>
     </div>
@@ -1338,6 +1416,7 @@ function getPtsTotal(wi) {
 }
 
 function updatePtsWarn(wi) {
+  if(autoTarget(wi)) return;
   const total=getPtsTotal(wi);
   document.querySelectorAll('.pts-warn').forEach(el=>{
     el.className='pts-warn '+(total===35?'warn-ok':'warn-bad');
@@ -1347,8 +1426,10 @@ function updatePtsWarn(wi) {
 
 function showSettings(wi) {
   const cats=getCats(wi), tgt=weekTarget(wi);
-  const warnC=tgt===35?'warn-ok':'warn-bad';
-  const warnT=tgt===35?`✅ Toplam hedef: ${tgt} / 35`:`⚠️ Toplam hedef: ${tgt} / 35 — 35 önerilir`;
+  const auto=autoTarget(wi);
+  const warnC=auto||tgt===35?'warn-ok':'warn-bad';
+  const warnT=auto?`🔄 Hedefler otomatik: her kategorinin hedefi = görev ve madde puanlarının toplamı · Haftanın toplamı: ${nf(tgt)}p`
+    :tgt===35?`✅ Toplam hedef: ${tgt} / 35`:`⚠️ Toplam hedef: ${tgt} / 35 — 35 önerilir`;
   document.getElementById('app').innerHTML=`
     <div class="settings-wrap">
       <div class="settings-info">
