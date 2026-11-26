@@ -640,6 +640,13 @@ button,input,select,textarea{font-family:var(--font);}
 .dg-done{border-top:1px solid var(--hair);}
 .dg-done summary{padding:12px 16px;font-size:13px;color:var(--muted);cursor:pointer;}
 @media(max-width:600px){.dg-item{grid-template-columns:22px minmax(0,1fr);}.dg-actions{grid-column:2;}.dg-who-in,.dg-date{flex:1 1 40%;}}
+.dg-url{flex:1 1 100%;}
+.dg-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+.dg-link{display:inline-flex;align-items:center;background:rgba(0,113,227,.08);border-radius:980px;padding:0 2px 0 10px;max-width:100%;}
+.dg-link a{color:var(--accent);font-size:12.5px;font-weight:500;text-decoration:none;padding:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;}
+.dg-link a:hover{text-decoration:underline;}
+.dg-link button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 7px;border-radius:50%;}
+.dg-link button:hover{color:var(--red);}
 </style>
 </head>
 <body>
@@ -878,7 +885,7 @@ let weekPlan = JSON.parse(localStorage.getItem('wp26') || 'null') || {};
 let monthNotes = JSON.parse(localStorage.getItem('mn26') || 'null') || {};
 // monthTasks["2026-10"] = [ {id, text, done} ] — puansız, ayın tüm haftalarında aynı liste
 let monthTasks = JSON.parse(localStorage.getItem('mt26') || 'null') || {};
-// delegated = { items: [ {id, text, who, given:'YYYY-AA-GG', due:'YYYY-AA-GG'|null, done, doneAt, checks:[{date, note}]} ] } — haftadan bağımsız tek liste
+// delegated = { items: [ {id, text, who, given:'YYYY-AA-GG', due:'YYYY-AA-GG'|null, done, doneAt, checks:[{date, note}], links:[{id, url}]} ] } — haftadan bağımsız tek liste
 let delegated = JSON.parse(localStorage.getItem('dg26') || 'null') || {items: []};
 
 
@@ -1917,7 +1924,33 @@ function dgSortKey(it) {
   const order = {late: 0, today: 1, check: 2, ok: 3, done: 4}[dgState(it)];
   return `${order}-${it.due || '9999'}-${it.given}`;
 }
-let dgOpenCheck = null, dgWho = '';
+let dgOpenCheck = null, dgWho = '', dgOpenLink = null;
+// Link: http(s) yoksa eklenir; sadece web adresleri kabul edilir
+function dgUrl(raw) {
+  let u = String(raw || '').trim(); if (!u) return null;
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  try { const x = new URL(u); return /^https?:$/.test(x.protocol) && x.hostname.includes('.') ? x.href : null; } catch(e) { return null; }
+}
+function dgLinkLabel(url) {
+  let x; try { x = new URL(url); } catch(e) { return 'Link'; }
+  const h = x.hostname.replace(/^www\./, ''), path = x.pathname;
+  if (h === 'docs.google.com') return path.includes('/spreadsheets') ? '📊 Google Tablo' : path.includes('/presentation') ? '📽 Google Slayt' : path.includes('/forms') ? '📝 Google Form' : '📄 Google Doküman';
+  if (h === 'drive.google.com') return '📁 Drive';
+  if (h.endsWith('canva.com')) return '🎨 Canva';
+  if (h.endsWith('figma.com')) return '🎨 Figma';
+  if (h.endsWith('notion.so') || h.endsWith('notion.site')) return '🗒 Notion';
+  if (h.endsWith('trello.com')) return '📋 Trello';
+  if (h.endsWith('facebook.com') || h.endsWith('fb.com')) return '📣 Meta';
+  if (h.endsWith('instagram.com')) return '📷 Instagram';
+  if (h.endsWith('youtube.com') || h === 'youtu.be') return '▶️ YouTube';
+  if (h.endsWith('dropbox.com')) return '📦 Dropbox';
+  if (h.endsWith('wetransfer.com') || h === 'we.tl') return '📦 WeTransfer';
+  return '🔗 ' + h;
+}
+function dgLinksHTML(it) {
+  const ls = it.links || [];
+  return ls.map(l => `<span class="dg-link"><a href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.url)}">${esc(dgLinkLabel(l.url))}</a><button title="Linki kaldır" onclick="dgLinkDel('${it.id}','${l.id}')">×</button></span>`).join('');
+}
 function buildDelegView() {
   const open = delegated.items.filter(it => !it.done), done = delegated.items.filter(it => it.done);
   const people = [...new Set(delegated.items.map(it => it.who).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'tr'));
@@ -1941,8 +1974,14 @@ function buildDelegView() {
           ${it.done ? `<span class="dg-ok">✓ Tamamlandı ${it.doneAt ? dgFmt(it.doneAt) : ''}</span>` : `<span class="dg-last">${lastTxt}</span>`}
           ${st === 'check' ? '<span class="dg-flag">Kontrol zamanı</span>' : ''}
         </div>
+        ${(it.links || []).length ? `<div class="dg-links">${dgLinksHTML(it)}</div>` : ''}
         ${lastNote ? `<div class="dg-note">“${esc(lastNote)}”</div>` : ''}
         ${checks.length > 1 ? `<details class="dg-hist"><summary>Kontrol geçmişi (${checks.length})</summary>${checks.slice().reverse().map(c => `<div><b>${dgFmt(c.date)}</b> ${esc(c.note || '—')}</div>`).join('')}</details>` : ''}
+        ${dgOpenLink === it.id ? `<div class="dg-checkbox">
+          <input class="dg-in" id="dg-link-in" placeholder="Link yapıştır (tablo, doküman, Drive…)" onkeydown="if(event.key==='Enter')dgLinkAdd('${it.id}')">
+          <button class="btn-add" onclick="dgLinkAdd('${it.id}')">Ekle</button>
+          <button class="btn-secondary" onclick="dgOpenLink=null;rerenderView()">Vazgeç</button>
+        </div>` : ''}
         ${dgOpenCheck === it.id ? `<div class="dg-checkbox">
           <input class="dg-in" id="dg-note" placeholder="Durum notu (ör. taslak geldi, revize istedim)" onkeydown="if(event.key==='Enter')dgCheck('${it.id}')">
           <button class="btn-add" onclick="dgCheck('${it.id}')">Kaydet</button>
@@ -1950,7 +1989,8 @@ function buildDelegView() {
         </div>` : ''}
       </div>
       <div class="dg-actions">
-        ${it.done ? '' : `<button class="dg-btn" onclick="dgOpenCheck='${it.id}';rerenderView();setTimeout(()=>document.getElementById('dg-note')?.focus(),0)">🔍 Kontrol ettim</button>`}
+        ${it.done ? '' : `<button class="dg-btn" onclick="dgOpenCheck='${it.id}';dgOpenLink=null;rerenderView();setTimeout(()=>document.getElementById('dg-note')?.focus(),0)">🔍 Kontrol ettim</button>`}
+        <button class="dg-btn" title="Link ekle" onclick="dgOpenLink='${it.id}';dgOpenCheck=null;rerenderView();setTimeout(()=>document.getElementById('dg-link-in')?.focus(),0)">🔗</button>
         <button class="btn-icon danger" title="Sil" onclick="dgDel('${it.id}')">×</button>
       </div>
     </div>`;
@@ -1972,6 +2012,7 @@ function buildDelegView() {
         <input class="dg-in dg-who-in" id="dg-who" list="dg-people" placeholder="Kime?" onkeydown="if(event.key==='Enter')dgAdd()">
         <datalist id="dg-people">${people.map(p => `<option value="${esc(p)}">`).join('')}</datalist>
         <input class="dg-in dg-date" id="dg-due" type="date" title="Son teslim tarihi (isteğe bağlı)">
+        <input class="dg-in dg-url" id="dg-url" placeholder="🔗 Link (isteğe bağlı: tablo, doküman…)" onkeydown="if(event.key==='Enter')dgAdd()">
         <button class="btn-add" onclick="dgAdd()">Ekle</button>
       </div>
       ${people.length > 1 ? `<div class="dg-filter">
@@ -1986,7 +2027,9 @@ function buildDelegView() {
 function dgAdd() {
   const g = id => document.getElementById(id);
   const text = (g('dg-text')?.value || '').trim(); if (!text) { g('dg-text')?.focus(); return; }
-  delegated.items.push({id: newId(), text, who: (g('dg-who')?.value || '').trim(), given: dgToday(), due: g('dg-due')?.value || null, done: false, doneAt: null, checks: []});
+  const rawUrl = (g('dg-url')?.value || '').trim(), url = dgUrl(rawUrl);
+  if (rawUrl && !url) { toast('⚠️ Link geçerli bir web adresi değil'); g('dg-url')?.focus(); return; }
+  delegated.items.push({id: newId(), text, who: (g('dg-who')?.value || '').trim(), given: dgToday(), due: g('dg-due')?.value || null, done: false, doneAt: null, checks: [], links: url ? [{id: newId(), url}] : []});
   saveDelegated(); rerenderView();
   setTimeout(() => g('dg-text')?.focus(), 0);
 }
@@ -2004,6 +2047,20 @@ function dgCheck(id) {
   dgOpenCheck = null;
   saveDelegated(); rerenderView();
   toast('🔍 Kontrol kaydedildi');
+}
+function dgLinkAdd(id) {
+  const it = dgFind(id); if (!it) return;
+  const inp = document.getElementById('dg-link-in'), url = dgUrl(inp?.value);
+  if (!url) { toast('⚠️ Link geçerli bir web adresi değil'); inp?.focus(); return; }
+  (it.links = it.links || []).push({id: newId(), url});
+  dgOpenLink = null;
+  saveDelegated(); rerenderView();
+  toast('🔗 Link eklendi');
+}
+function dgLinkDel(id, lid) {
+  const it = dgFind(id); if (!it) return;
+  it.links = (it.links || []).filter(l => l.id !== lid);
+  saveDelegated(); rerenderView();
 }
 function dgDel(id) {
   const it = dgFind(id); if (!it) return;
