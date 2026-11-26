@@ -9,6 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2026 Haftalık Takip</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -592,6 +593,53 @@ button,input,select,textarea{font-family:var(--font);}
 @media(hover:none){.sub-mk{opacity:.6;}}
 .grp-chk{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);white-space:nowrap;cursor:pointer;}
 .grp-ed{font-size:11px;color:var(--accent);font-weight:600;white-space:nowrap;}
+
+/* ── GÖREV SIRALAMA ── */
+.tk-drag{display:inline-flex;align-items:center;justify-content:center;width:18px;margin:0 6px 0 -8px;color:#c7c7cc;font-size:14px;cursor:grab;touch-action:none;vertical-align:middle;}
+.tk-drag:hover{color:var(--muted);}
+.tk-ghost{opacity:.35;}
+.tk-chosen .task-row{background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.15);}
+.sortable-fallback{opacity:.95!important;}
+/* ── DELEGE ── */
+.dg-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;margin-left:2px;}
+.dg-stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.dg-st{background:var(--card);border-radius:12px;padding:9px 14px;font-size:13px;color:var(--muted);box-shadow:var(--shadow);}
+.dg-st b{font-size:19px;color:var(--text);margin-right:4px;font-variant-numeric:tabular-nums;}
+.dg-st.red b{color:var(--red);}.dg-st.orange b{color:var(--orange);}.dg-st.green b{color:var(--green);}
+.dg-add{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px;border-bottom:1px solid var(--hair);}
+.dg-in{flex:1 1 200px;min-width:0;border:0;border-radius:10px;background:#f2f2f5;padding:10px 12px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;}
+.dg-in:focus{background:#fff;box-shadow:0 0 0 3px rgba(0,113,227,.2);}
+.dg-who-in{flex:0 1 150px;}
+.dg-date{flex:0 1 150px;}
+.dg-filter{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;border-bottom:1px solid var(--hair);}
+.dg-filter button{border:0;background:#f2f2f5;color:var(--text);border-radius:980px;padding:5px 12px;font-family:var(--font);font-size:12.5px;cursor:pointer;}
+.dg-filter button.on{background:var(--accent);color:#fff;}
+.dg-item{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 16px;border-top:1px solid var(--hair);border-left:3px solid transparent;}
+.dg-list .dg-item:first-child{border-top:0;}
+.dg-item.late{border-left-color:var(--red);background:rgba(215,0,21,.03);}
+.dg-item.today{border-left-color:var(--orange);}
+.dg-item.check{border-left-color:var(--orange);background:rgba(255,149,0,.04);}
+.dg-chk{width:19px;height:19px;margin-top:2px;accent-color:var(--green);cursor:pointer;}
+.dg-text{font-size:14.5px;font-weight:500;color:var(--text);overflow-wrap:anywhere;}
+.dg-item.done .dg-text{text-decoration:line-through;color:var(--muted);}
+.dg-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:12px;color:var(--muted);}
+.dg-who{color:var(--accent);font-weight:600;}
+.dg-item.late .dg-due{color:var(--red);font-weight:600;}
+.dg-item.today .dg-due{color:var(--orange);font-weight:600;}
+.dg-ok{color:var(--green);}
+.dg-flag{color:var(--orange);font-weight:600;}
+.dg-note{margin-top:6px;font-size:12.5px;color:var(--text);background:#f5f5f7;border-radius:10px;padding:6px 10px;}
+.dg-hist{margin-top:6px;font-size:12px;color:var(--muted);}
+.dg-hist summary{cursor:pointer;}
+.dg-hist div{padding:3px 0 3px 4px;}
+.dg-checkbox{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.dg-actions{display:flex;align-items:center;gap:6px;}
+.dg-btn{border:0;background:#e8e8ed;color:var(--text);border-radius:980px;padding:6px 12px;font-family:var(--font);font-size:12.5px;cursor:pointer;white-space:nowrap;}
+.dg-btn:hover{background:#dcdce1;}
+.dg-empty{padding:22px 16px;text-align:center;color:var(--muted);font-size:13px;}
+.dg-done{border-top:1px solid var(--hair);}
+.dg-done summary{padding:12px 16px;font-size:13px;color:var(--muted);cursor:pointer;}
+@media(max-width:600px){.dg-item{grid-template-columns:22px minmax(0,1fr);}.dg-actions{grid-column:2;}.dg-who-in,.dg-date{flex:1 1 40%;}}
 </style>
 </head>
 <body>
@@ -778,6 +826,7 @@ async function syncFromCloud() {
   const wp = await sbGet('wp26');
   const mn = await sbGet('mn26');
   const mt = await sbGet('mt26');
+  const dg = await sbGet('dg26');
   console.log('syncFromCloud wc:', wc ? 'var' : 'yok', 'wd:', wd ? 'var' : 'yok', 'wp:', wp ? 'var' : 'yok', 'mn:', mn ? 'var' : 'yok');
   // Henüz buluta gönderilmemiş yerel değişikliğin üzerine yazma
   if(wc && !_dirty.has('wc26')) { weekCats = wc; localStorage.setItem('wc26', JSON.stringify(wc)); }
@@ -785,7 +834,8 @@ async function syncFromCloud() {
   if(wp && !_dirty.has('wp26')) { weekPlan = wp; localStorage.setItem('wp26', JSON.stringify(wp)); }
   if(mn && !_dirty.has('mn26')) { monthNotes = mn; localStorage.setItem('mn26', JSON.stringify(mn)); }
   if(mt && !_dirty.has('mt26')) { monthTasks = mt; localStorage.setItem('mt26', JSON.stringify(mt)); }
-  if(wc || wd || wp || mn || mt) {
+  if(dg && Array.isArray(dg.items) && !_dirty.has('dg26')) { delegated = dg; localStorage.setItem('dg26', JSON.stringify(dg)); }
+  if(wc || wd || wp || mn || mt || dg) {
     if(currentQ < 4 && document.getElementById('app')) { renderWeekSelector(currentQ); renderWeek(currentWI); }
     toast('✅ Senkronize edildi!');
   }
@@ -795,6 +845,7 @@ async function syncFromCloud() {
 // Sadece değişen anahtarlar buluta gönderilir
 const _dirty = new Set();
 const CLOUD_KEYS = {
+  dg26: () => delegated,
   wc26: () => weekCats,
   wd26: () => weekData,
   wp26: () => weekPlan,
@@ -827,6 +878,8 @@ let weekPlan = JSON.parse(localStorage.getItem('wp26') || 'null') || {};
 let monthNotes = JSON.parse(localStorage.getItem('mn26') || 'null') || {};
 // monthTasks["2026-10"] = [ {id, text, done} ] — puansız, ayın tüm haftalarında aynı liste
 let monthTasks = JSON.parse(localStorage.getItem('mt26') || 'null') || {};
+// delegated = { items: [ {id, text, who, given:'YYYY-AA-GG', due:'YYYY-AA-GG'|null, done, doneAt, checks:[{date, note}]} ] } — haftadan bağımsız tek liste
+let delegated = JSON.parse(localStorage.getItem('dg26') || 'null') || {items: []};
 
 
 
@@ -981,6 +1034,7 @@ function buildWeekPage(wi) {
   let body;
   if (weekView === 'mtasks') body = buildMonthTasksView(wi);
   else if (weekView === 'days') body = buildDaysView(wi);
+  else if (weekView === 'deleg') body = buildDelegView();
   else if (weekView === 'month') body = buildMonthView(wi);
   else body = buildTasksView(wi);
   return buildWeekHeader(wi) + body + buildSubNav(wi);
@@ -1134,7 +1188,7 @@ function buildTasksView(wi) {
         <span class="dh-span" style="width:27px">PTS</span>
         ${DAYS_SHORT.map(d=>`<span class="dh-span">${d}</span>`).join('')}
       </div>
-      ${cat.tasks.map((task,ti)=>{
+      <div class="task-list" data-wi="${wi}" data-ci="${ci}">${cat.tasks.map((task,ti)=>{
         const grp=isGroup(task);
         const sess=task.sessions||1;
         const isDone=taskIsDone(wi,ci,ti);
@@ -1153,8 +1207,8 @@ function buildTasksView(wi) {
         } else {
           badge=`<span class="free-badge">serbest</span>`;
         }
-        return `<div class="task-row ${grp?'grp-row':''} ${rowCls} ${rocks.includes(taskKey(cat,task))?'is-rock':''}" style="grid-template-columns:${gc}">
-          <span class="task-name">${task.name}${grp?`<span class="grp-tag" id="gtag-${wi}-${ci}-${ti}">${subDoneCount(task)}/${task.subs.length} madde</span>`:''}${badge}${gainHTML(wi,ci,ti)}${grp?'':`<button class="sub-mk" title="Alt maddeli başlığa çevir" onclick="subMake(${wi},${ci},${ti})">＋ madde</button>`}</span>
+        return `<div class="task-item" data-ti="${ti}"><div class="task-row ${grp?'grp-row':''} ${rowCls} ${rocks.includes(taskKey(cat,task))?'is-rock':''}" style="grid-template-columns:${gc}">
+          <span class="task-name"><span class="drag-h tk-drag" title="Sürükleyip sırala">⠿</span>${task.name}${grp?`<span class="grp-tag" id="gtag-${wi}-${ci}-${ti}">${subDoneCount(task)}/${task.subs.length} madde</span>`:''}${badge}${gainHTML(wi,ci,ti)}${grp?'':`<button class="sub-mk" title="Alt maddeli başlığa çevir" onclick="subMake(${wi},${ci},${ti})">＋ madde</button>`}</span>
           ${(()=>{const k=taskKey(cat,task), on=rocks.includes(k);
             return `<button class="rk-tag ${on?'on':''}" data-key="${esc(k)}" title="${on?'Bu haftanın taşı — çıkarmak için dokun':'Bu haftanın 3 taşından biri yap'}" onclick="rkToggle(this.dataset.key)">🎯</button>`;})()}
           <span class="pts-badge" style="background:${cat.color}26;color:${inkOf(cat.color)};min-width:36px;font-size:9px;padding:2px 4px" title="${grp?`Maddelerin puan toplamı: ${tPts(task)}`:sess>1?`${sess} oturumda ${task.pts} puan`:`${task.pts} puan`}">
@@ -1174,8 +1228,8 @@ function buildTasksView(wi) {
               title="${dl===di?`⏰ Deadline günü`:sess>1?`Hedef: ${sess} oturum — bugün: ${val}`:''}"
               onchange="updateCell(this,${wi},${ci},${ti},${di})">`;
           }).join('')}
-        </div>${grp?buildSubList(wi,ci,ti,task,gc):''}`;
-      }).join('')}
+        </div>${grp?buildSubList(wi,ci,ti,task,gc):''}</div>`;
+      }).join('')}</div>
     </div>`;
   });
   return html;
@@ -1669,6 +1723,7 @@ function renderWeek(wi) {
   const activebtn=document.getElementById(`wbtn-${wi}`);
   if(activebtn) activebtn.classList.add('active');
   document.getElementById('app').innerHTML=buildWeekPage(wi);
+  initTaskSort();
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1714,7 +1769,8 @@ function exportData() {
     weekData: weekData,
     weekPlan: weekPlan,
     monthNotes: monthNotes,
-    monthTasks: monthTasks
+    monthTasks: monthTasks,
+    delegated: delegated
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1776,6 +1832,7 @@ function importData() {
     if(payload.weekPlan) weekPlan = payload.weekPlan;
     if(payload.monthNotes) monthNotes = payload.monthNotes;
     if(payload.monthTasks) monthTasks = payload.monthTasks;
+    if(payload.delegated && Array.isArray(payload.delegated.items)) { delegated = payload.delegated; saveDelegated(); }
     save(); savePlan(); saveMonth(); saveMonthTasks();
     document.getElementById('import-modal').remove();
     toast('✅ Veriler basariyla yuklendi!');
@@ -1808,6 +1865,152 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+/* ══ GÖREV SIRALAMA — Görevler sayfasında ⠿ tutamacıyla sürükle-bırak (kategori içinde) ══ */
+function initTaskSort() {
+  if (!window.Sortable) return;
+  document.querySelectorAll('.task-list').forEach(el => {
+    if (el._sortable) return;
+    el._sortable = Sortable.create(el, {
+      handle: '.tk-drag', draggable: '.task-item', animation: 160,
+      ghostClass: 'tk-ghost', chosenClass: 'tk-chosen', forceFallback: true, fallbackTolerance: 3,
+      onEnd: e => { if (e.oldIndex !== e.newIndex) moveTask(+el.dataset.wi, +el.dataset.ci, e.oldIndex, e.newIndex); },
+    });
+  });
+}
+// Görev ve o görevin gün girişleri birlikte taşınır
+function moveTask(wi, ci, from, to) {
+  const cat = getCats(wi)[ci]; if (!cat || from === to || !cat.tasks[from]) return;
+  const d = getData(wi);
+  if (!d[ci]) d[ci] = [];
+  while (d[ci].length < cat.tasks.length) d[ci].push(Array(7).fill(0));
+  const [t] = cat.tasks.splice(from, 1); cat.tasks.splice(to, 0, t);
+  const [r] = d[ci].splice(from, 1); d[ci].splice(to, 0, r);
+  save(); rerenderView();
+}
+
+/* ══ DELEGE EDİLEN İŞLER — kime ne verdim, ne zaman kontrol ettim ══ */
+const DG_CHECK_DAYS = 3;   // bu kadar gündür kontrol edilmeyen açık iş "kontrol zamanı" olur
+function saveDelegated() {
+  try { localStorage.setItem('dg26', JSON.stringify(delegated)); _dirty.add('dg26'); saveToCloud(); }
+  catch(e) { toast('⚠️ Depolama dolu, eski veriler silinebilir'); }
+}
+const dgIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dgToday = () => dgIso(new Date());
+function dgDate(iso) { const [y,m,d] = String(iso).split('-').map(Number); return new Date(y, m-1, d); }
+function dgDiff(iso) { return Math.round((dgDate(iso) - dgDate(dgToday())) / 86400000); }   // + gelecek, - geçmiş
+function dgFmt(iso) { const d = dgDate(iso); return `${d.getDate()} ${MONTHS_TR[d.getMonth()].slice(0,3)}`; }
+function dgLastCheck(it) { return (it.checks || []).reduce((a, c) => !a || c.date > a ? c.date : a, null); }
+function dgState(it) {
+  if (it.done) return 'done';
+  if (it.due && dgDiff(it.due) < 0) return 'late';
+  if (it.due && dgDiff(it.due) === 0) return 'today';
+  const last = dgLastCheck(it) || it.given;
+  if (-dgDiff(last) >= DG_CHECK_DAYS) return 'check';
+  return 'ok';
+}
+function dgBadge() {
+  const n = delegated.items.filter(it => ['late','today','check'].includes(dgState(it))).length;
+  return n ? ` <span class="dg-cnt">${n}</span>` : '';
+}
+function dgSortKey(it) {
+  const order = {late: 0, today: 1, check: 2, ok: 3, done: 4}[dgState(it)];
+  return `${order}-${it.due || '9999'}-${it.given}`;
+}
+let dgOpenCheck = null, dgWho = '';
+function buildDelegView() {
+  const open = delegated.items.filter(it => !it.done), done = delegated.items.filter(it => it.done);
+  const people = [...new Set(delegated.items.map(it => it.who).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'tr'));
+  const shown = open.filter(it => !dgWho || it.who === dgWho).sort((a, b) => dgSortKey(a).localeCompare(dgSortKey(b)));
+  const cnt = st => open.filter(it => dgState(it) === st).length;
+  const row = it => {
+    const st = dgState(it), last = dgLastCheck(it), checks = it.checks || [];
+    const dueTxt = !it.due ? '' : st === 'done' ? `⏰ ${dgFmt(it.due)}`
+      : dgDiff(it.due) < 0 ? `⚠ ${dgFmt(it.due)} · ${-dgDiff(it.due)} gün geçti`
+      : dgDiff(it.due) === 0 ? `⏰ Bugün teslim` : `⏰ ${dgFmt(it.due)} · ${dgDiff(it.due)} gün kaldı`;
+    const lastTxt = last ? `🔍 Son kontrol: ${-dgDiff(last) === 0 ? 'bugün' : `${-dgDiff(last)} gün önce`}` : '🔍 Henüz kontrol edilmedi';
+    const lastNote = checks.length ? checks[checks.length - 1].note : '';
+    return `<div class="dg-item ${st}">
+      <input type="checkbox" class="dg-chk" title="Bitti" ${it.done ? 'checked' : ''} onchange="dgToggle('${it.id}',this.checked)">
+      <div class="dg-main">
+        <div class="dg-text">${esc(it.text)}</div>
+        <div class="dg-meta">
+          ${it.who ? `<span class="dg-who">👤 ${esc(it.who)}</span>` : ''}
+          <span>Verildi ${dgFmt(it.given)}</span>
+          ${dueTxt ? `<span class="dg-due">${dueTxt}</span>` : ''}
+          ${it.done ? `<span class="dg-ok">✓ Tamamlandı ${it.doneAt ? dgFmt(it.doneAt) : ''}</span>` : `<span class="dg-last">${lastTxt}</span>`}
+          ${st === 'check' ? '<span class="dg-flag">Kontrol zamanı</span>' : ''}
+        </div>
+        ${lastNote ? `<div class="dg-note">“${esc(lastNote)}”</div>` : ''}
+        ${checks.length > 1 ? `<details class="dg-hist"><summary>Kontrol geçmişi (${checks.length})</summary>${checks.slice().reverse().map(c => `<div><b>${dgFmt(c.date)}</b> ${esc(c.note || '—')}</div>`).join('')}</details>` : ''}
+        ${dgOpenCheck === it.id ? `<div class="dg-checkbox">
+          <input class="dg-in" id="dg-note" placeholder="Durum notu (ör. taslak geldi, revize istedim)" onkeydown="if(event.key==='Enter')dgCheck('${it.id}')">
+          <button class="btn-add" onclick="dgCheck('${it.id}')">Kaydet</button>
+          <button class="btn-secondary" onclick="dgOpenCheck=null;rerenderView()">Vazgeç</button>
+        </div>` : ''}
+      </div>
+      <div class="dg-actions">
+        ${it.done ? '' : `<button class="dg-btn" onclick="dgOpenCheck='${it.id}';rerenderView();setTimeout(()=>document.getElementById('dg-note')?.focus(),0)">🔍 Kontrol ettim</button>`}
+        <button class="btn-icon danger" title="Sil" onclick="dgDel('${it.id}')">×</button>
+      </div>
+    </div>`;
+  };
+  return `<div class="mt-wrap dg-wrap">
+    <div class="sub-intro">
+      <b>🤝 Delege ettiğim işler</b> — Başkasına verdiğin işler; haftadan bağımsız, her haftada aynı liste.
+      <span class="sub-hint">Kontrol ettikçe "🔍 Kontrol ettim" ile kısa not düş. ${DG_CHECK_DAYS} gündür bakılmayan iş "kontrol zamanı" olur; teslim tarihi geçen kırmızıya döner.</span>
+    </div>
+    <div class="dg-stats">
+      <span class="dg-st red"><b>${cnt('late')}</b> gecikmiş</span>
+      <span class="dg-st orange"><b>${cnt('today') + cnt('check')}</b> bugün bak</span>
+      <span class="dg-st"><b>${open.length}</b> açık iş</span>
+      <span class="dg-st green"><b>${done.length}</b> tamamlandı</span>
+    </div>
+    <div class="mt-card">
+      <div class="dg-add">
+        <input class="dg-in" id="dg-text" placeholder="Delege ettiğin iş…" onkeydown="if(event.key==='Enter')dgAdd()">
+        <input class="dg-in dg-who-in" id="dg-who" list="dg-people" placeholder="Kime?" onkeydown="if(event.key==='Enter')dgAdd()">
+        <datalist id="dg-people">${people.map(p => `<option value="${esc(p)}">`).join('')}</datalist>
+        <input class="dg-in dg-date" id="dg-due" type="date" title="Son teslim tarihi (isteğe bağlı)">
+        <button class="btn-add" onclick="dgAdd()">Ekle</button>
+      </div>
+      ${people.length > 1 ? `<div class="dg-filter">
+        <button class="${!dgWho ? 'on' : ''}" onclick="dgWho='';rerenderView()">Hepsi</button>
+        ${people.map(p => `<button class="${dgWho === p ? 'on' : ''}" data-p="${esc(p)}" onclick="dgWho=this.dataset.p;rerenderView()">${esc(p)} · ${open.filter(it => it.who === p).length}</button>`).join('')}
+      </div>` : ''}
+      <div class="dg-list">${shown.map(row).join('') || '<div class="dg-empty">Açık delege iş yok 🎉</div>'}</div>
+      ${done.length ? `<details class="dg-done"><summary>Tamamlananlar (${done.length})</summary>${done.slice().sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '')).map(row).join('')}</details>` : ''}
+    </div>
+  </div>`;
+}
+function dgAdd() {
+  const g = id => document.getElementById(id);
+  const text = (g('dg-text')?.value || '').trim(); if (!text) { g('dg-text')?.focus(); return; }
+  delegated.items.push({id: newId(), text, who: (g('dg-who')?.value || '').trim(), given: dgToday(), due: g('dg-due')?.value || null, done: false, doneAt: null, checks: []});
+  saveDelegated(); rerenderView();
+  setTimeout(() => g('dg-text')?.focus(), 0);
+}
+function dgFind(id) { return delegated.items.find(it => it.id === id); }
+function dgToggle(id, on) {
+  const it = dgFind(id); if (!it) return;
+  it.done = on; it.doneAt = on ? dgToday() : null;
+  saveDelegated(); rerenderView();
+  if (on) toast(`✅ ${it.who ? it.who + ': ' : ''}${it.text} tamamlandı`);
+}
+function dgCheck(id) {
+  const it = dgFind(id); if (!it) return;
+  if (!it.checks) it.checks = [];
+  it.checks.push({date: dgToday(), note: (document.getElementById('dg-note')?.value || '').trim()});
+  dgOpenCheck = null;
+  saveDelegated(); rerenderView();
+  toast('🔍 Kontrol kaydedildi');
+}
+function dgDel(id) {
+  const it = dgFind(id); if (!it) return;
+  if (!confirm(`"${it.text}" silinsin mi?`)) return;
+  delegated.items = delegated.items.filter(x => x.id !== id);
+  saveDelegated(); rerenderView();
+}
 
 // Görevlerin kalıcı bir id'si yok; kategori + görev adı, düzenlemelere karşı indeksten daha dayanıklı
 function taskKey(cat, task) { return cat.name + '::' + task.name; }
@@ -1855,7 +2058,7 @@ function setWeekView(v) {
   if (window.scrollY > top) window.scrollTo({top, behavior:'smooth'});
 }
 
-function rerenderView() { document.getElementById('app').innerHTML = buildWeekPage(currentWI); }
+function rerenderView() { document.getElementById('app').innerHTML = buildWeekPage(currentWI); initTaskSort(); }
 
 function buildSubNav(wi) {
   const r = monthRole(wi), mn = MONTHS_TR[r.month];
@@ -1866,7 +2069,7 @@ function buildSubNav(wi) {
   else if (r.first)      monthBtn = btn('month', `🌱 ${mn} Hedefleri`, 'month');
   else if (r.last)       monthBtn = btn('month', `🔍 ${mn} Değerlendirmesi`, 'month');
   return `<div class="week-subnav">
-    ${btn('tasks', '📋 Görevler & Odak')}${btn('mtasks', `🗓 ${mn} Görevleri`)}${btn('days', '📅 Günlük Plan')}${monthBtn}
+    ${btn('tasks', '📋 Görevler & Odak')}${btn('mtasks', `🗓 ${mn} Görevleri`)}${btn('days', '📅 Günlük Plan')}${btn('deleg', `🤝 Delege${dgBadge()}`)}${monthBtn}
   </div>`;
 }
 
