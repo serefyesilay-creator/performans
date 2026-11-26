@@ -2543,5 +2543,25 @@ function buildMonthView(wi) {
 updateHeroStats();
 </script>
 <script>window.addEventListener("load", () => { setTimeout(syncFromCloud, 2000); });</script>
+<script>
+/* Kendi kendini güncelleme: tarayıcı eski sürümü önbellekten açarsa, yayındaki sürümü (önbelleksiz) kontrol eder,
+   yeni sürüm varsa sayfayı bir kez yeniler. Bekleyen bulut kaydı varsa önce gönderilir. */
+const APP_VER = '202611261417';
+async function checkAppUpdate() {
+  if (!/^https?:$/.test(location.protocol)) return;
+  try {
+    const r = await fetch(location.pathname + '?v=' + Date.now(), {cache: 'no-store'});
+    const m = /const APP_VER = '(\d+)'/.exec(await r.text());
+    if (!m || m[1] === APP_VER) return;
+    if (sessionStorage.getItem('upd-tried') === m[1]) return;   // yenileme döngüsüne girme
+    sessionStorage.setItem('upd-tried', m[1]);
+    clearTimeout(_saveTimer); await flushCloud();
+    toast('🔄 Yeni sürüm yükleniyor…');
+    setTimeout(() => location.replace(location.pathname + '?v=' + m[1] + location.hash), 600);
+  } catch (e) {}
+}
+window.addEventListener('load', () => setTimeout(checkAppUpdate, 1200));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkAppUpdate(); });
+</script>
 </body>
 </html>
