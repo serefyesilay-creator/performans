@@ -2523,9 +2523,23 @@ function buildMonthView(wi) {
 /* ══════════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════════ */
-// Pre-init all weeks (lazy — only when accessed)
-renderWeekSelector(0);
-renderWeek(0);
+// Açılışta içinde bulunduğumuz haftaya git (yıl bittiyse son hafta) ve sayfayı o haftanın başına kaydır
+(function openCurrentWeek() {
+  const wi = Math.min(TODAY_WI, WEEKS.length - 1);
+  const q = Math.max(0, Q_WEEKS.findIndex(qw => qw.some(w => w.idx === wi)));
+  currentWI = wi;
+  showQ(q, document.querySelectorAll('.q-tab')[q]);
+  centerActiveWeek();
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  const go = () => {
+    const app = document.getElementById('app'), bar = document.querySelector('.data-bar');
+    if (!app) return;
+    const top = app.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 0) - 12;
+    window.scrollTo({top: Math.max(0, top)});
+  };
+  requestAnimationFrame(() => requestAnimationFrame(go));
+  window.addEventListener('load', go, {once: true});   // fontlar/görseller yüklenince konum kaymasın
+})();
 updateHeroStats();
 </script>
 <script>window.addEventListener("load", () => { setTimeout(syncFromCloud, 2000); });</script>
